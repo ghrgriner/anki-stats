@@ -1,0 +1,11 @@
+/docs
+/exclude
+# log and png files I create should be saved in output and not uploaded to the
+# repository, but if I accidentally create one in the current directory, I
+# also don't want to upload.
+*.log
+*.png
+__pycache__
+/input
+/output
+pylintrc
