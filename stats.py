@@ -28,8 +28,8 @@ The input file should be tab-delimited with '"' as the quote character and
 should contain at least the following columns:
    [`c_type`, `c_due`, `c_odue`, `c_odid`, `c_queue`, `c_ivl`, `c_nid`,
     `c_id`, `c_stability`, `c_difficulty`, `csd_fsrs_retrievability`,
-    `c_CardType`, `col_TodayDaysElapsed, `c_Data`, `revlog_entries`,
-    `col_RolloverHour`],
+    `c_factor`, `c_CardType`, `col_TodayDaysElapsed, `c_Data`,
+    `revlog_entries`, `col_RolloverHour`],
 where:
   - `c_[var]` (var lowercase) contains the Python `card.var` variable, or,
     in the case of [var] = `difficulty` and `stability`, the Python
@@ -247,6 +247,15 @@ def make_diff_bin(x):
         else:
             return f'[{5*(bin_num)}%, {5*(bin_num+1)}%)'
 
+def make_ease_bin(x):
+    if not x:
+        return ''
+    elif math.isnan(x):
+        return ''
+    else:
+        ease = x // 10
+        return f'[{10*(ease // 10)}%, {10*((ease // 10)+1)}%)'
+
 # internet suggests default round in rust is round-to-even, but testing
 # Anki suggests it is using round-away from zero. Default in Python is
 # round-to-even, so a custom round function is written.
@@ -365,6 +374,7 @@ df_cards_m['stability_rounded'] = df_cards_m.c_stability.map(round_away)
 df_cards_m['bin_retr'] = df_cards_m.csd_fsrs_retrievability.map(
     lambda x: np.nan if math.isnan(x) else (100*x // 5))
 df_cards_m['bin_retr_label'] = df_cards_m.bin_retr.map(bin_label_from_index)
+df_cards_m['ease_label'] = df_cards_m.c_factor.map(make_ease_bin)
 df_cards_m['scaled_difficulty'] = 100*(df_cards_m.c_difficulty - 1) / 9
 df_cards_m['diff_bin_label'] = df_cards_m.scaled_difficulty.map(make_diff_bin)
 
@@ -522,14 +532,19 @@ freq(df_cards, 'c_ivl',
               | (df_cards.c_type == CARD_TYPE_RELEARNING)))
             & (df_cards.c_ivl <= 31))
 
+freq(df_cards_m, ['ease_label'],
+     title='Table 7: Card Ease (non-FSRS decks only)',
+     where=( (  (df_cards.c_type == CARD_TYPE_REV)
+              | (df_cards.c_type == CARD_TYPE_RELEARNING))))
+
 # TODO: Anki `running total` percentage in 'onHover' seems wrong. Research and
 # report bug.
 freq(df_cards_m, ['stability_rounded'],
-     title='Table 7: Card Stability',
+     title='Table 8: Card Stability (FSRS decks only)',
      where=df_cards_m.stability_rounded < 31)
 
 freq(df_cards_m, ['diff_bin_label'],
-     title='Table 8: Card Difficulty',
+     title='Table 9: Card Difficulty (FSRS desks only)',
      where=~pd.isnull(df_cards.scaled_difficulty))
      #where=(df_cards_m.diff_bin_label != ''))
 
@@ -539,27 +554,27 @@ freq(df_cards_m, ['diff_bin_label'],
 # functions to calculate the `days_elapsed` that is an input to the
 # retrievability calculation.
 freq(df_cards, 'bin_retr_label',
-     title='Table 9: Card Retrievability',
+     title='Table 10: Card Retrievability (FSRS desks only)',
      where=~pd.isnull(df_cards.scaled_difficulty))
 
 freq(df_r_and_c, ['review_hr'],
-     title='Table 10: Hourly Breakdown (counts)',
+     title='Table 11: Hourly Breakdown (counts)',
      where=(  (df_r_and_c.review_kind != REVLOG_MANUAL)
             & (df_r_and_c.review_kind != REVLOG_RESCHED)
             & (df_r_and_c.review_kind != REVLOG_FILT)))
 
 freq(df_reviews, ['review_kind_subcat1_label','ease'],
-     title='Table 11: Answer Buttons',
+     title='Table 12: Answer Buttons',
      where=(  (df_reviews.review_kind != REVLOG_MANUAL)
             & (df_reviews.review_kind != REVLOG_RESCHED)
             & (df_reviews.ease >= 1)
             & (df_reviews.ease <= 4)))
 
 freq(df_cards_m, ['added_days'],
-     title='Table 12: Added',
+     title='Table 13: Added',
      where=(df_cards_m.added_days >= -31) & (df_cards_m.added_days <= 0))
 
-print('\nTable 13: True Retention')
+print('\nTable 14: True Retention')
 print('                Young    Mature     Total     Count')
 print_retention_row(desc='Today',      start_day=0,    end_day=0)
 print_retention_row(desc='Yesterday',  start_day=-1,   end_day=-1)
