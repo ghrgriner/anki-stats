@@ -27,13 +27,13 @@ variable analyzed in the chart/text (if applicable).
 The input file should be tab-delimited with '"' as the quote character and
 should contain at least the following columns:
    [`c_type`, `c_due`, `c_odue`, `c_odid`, `c_queue`, `c_ivl`, `c_nid`,
-    `c_id`, `c_stability`, `c_difficulty`, `csd_fsrs_etrievability`,
+    `c_id`, `c_stability`, `c_difficulty`, `csd_fsrs_retrievability`,
     `c_CardType`, `col_TodayDaysElapsed, `c_Data`, `revlog_entries`,
     `col_RolloverHour`],
 where:
   - `c_[var]` (var lowercase) contains the Python `card.var` variable, or,
-    in the case of `c_difficulty` and `c_stability`, the Python
-    `card.memory_state.var` variable.
+    in the case of [var] = `difficulty` and `stability`, the Python
+    `card.memory_state.[var]` variable.
   - `csd_fsrs_retrievability` contains the FSRS retrievability from
      mw.col.card_stats_data(card.id).fsrs_retrievability
   - `c_CardType` is the card type from `card.template()['name']`
