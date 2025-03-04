@@ -307,14 +307,13 @@ def print_retention_row(desc, start_day, end_day):
             df3_ = df_[subset]
         else:
             df3_ = df_
-        den = df3_.correct.count()
+        den = df3_.correct_answer.count()
         if den == 0:
             return 'N/A'
         else:
-            #print(f'{desc=} {df3_.correct.value_counts()}')
-            pct_series = (df3_.correct.value_counts()/den)*100
+            pct_series = (df3_.correct_answer.value_counts()/den)*100
             try:
-                pct = pct_series.at[1.0]
+                pct = pct_series.at[True]
             except KeyError:
                 return '  0   '
             return f'{pct:6.1f}%'
@@ -447,8 +446,11 @@ df_reviews['retention_pop'] = (
      & ((df_reviews.review_kind == REVLOG_REV) | (df_reviews.lastivl <= -86400)
         | (df_reviews.lastivl >= 1))
                               )
-df_reviews['correct'] = (np.where(df_reviews.retention_pop,
-                                  (df_reviews.ease > 1).astype(int), np.nan))
+# True / False / None
+df_reviews['correct_answer'] = (np.where(df_reviews.ease == 0,
+                                         None, (df_reviews.ease > 1)))
+#df_reviews['correct'] = (np.where(df_reviews.retention_pop,
+#                                  (df_reviews.ease > 1).astype(int), np.nan))
 
 #------------------------------------------------------------------------------
 # 1c. Read card file that was exported from the browser. This is needed because
@@ -477,10 +479,23 @@ df_r_and_c = df_cards.merge(df_reviews, how='left', on='c_id')
 #------------------------------------------------------------------------------
 
 freq(df_reviews, 'review_kind_label', percent=True,
-     title='Table 1: Today',
+     title='Table 1a: Today',
      where=(  (df_reviews.review_kind != REVLOG_MANUAL)
             & (df_reviews.review_kind != REVLOG_RESCHED)
             & (df_reviews.review_relative_days == 0)))
+
+freq(df_reviews, 'correct_answer', percent=True,
+     title='Table 1b: Today (all cards)',
+     where=(  (df_reviews.review_kind != REVLOG_MANUAL)
+            & (df_reviews.review_kind != REVLOG_RESCHED)
+            & (df_reviews.review_relative_days == 0)))
+
+freq(df_reviews, 'correct_answer', percent=True,
+     title='Table 1c: Today (mature cards)',
+     where=(  (df_reviews.review_kind != REVLOG_MANUAL)
+            & (df_reviews.review_kind != REVLOG_RESCHED)
+            & (df_reviews.review_relative_days == 0)
+            & (df_reviews.lastivl >= 21)))
 
 freq(df_cards_m, 'due_days', percent=True,
      title='Table 2: Future Due',
