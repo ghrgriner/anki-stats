@@ -18,6 +18,48 @@ application reports, with the expectation that this will be
 an easier starting point than the existing Svelte and Rust
 code for users who wish to create custom reports.
 
+The documentation in this repository does not include discussion
+on the interpretation of the outcome variables themselves, such
+as the meaning of FSRS retrievability.
+
+# Motivation
+Consider the following motivating questions and situations:
+
+1. Among charts that report card counts the total counts are not always
+the same, and similarly for charts that report review counts. Why
+is this?
+
+2. How are the tables and charts affected when studying is done in a
+Filtered deck? For example, are these reviews included when counting
+the percent of reviews that were correct?
+
+3. How are the tables and charts affected when studying is done early
+or late? For example, are these included when counting the percent
+of reviews that were correct? Does it matter how early or late the
+review was?
+
+4. How are the tables and charts affects affected when cards are
+reset or deleted?
+
+5. You are studying a foreign language and you have two different
+card types: one with your target language on the front and the other
+with your native language on the front. You are interested in having
+selected charts and tables stratified by these two card types.
+
+6. You suspect or know some cards are harder than others and are
+interested in quantifying the amount. For example, suppose you are
+studying a foreign language with cards that have your native language
+on the front. Some cards have a single target language word on the
+back, and other cards have multiple target language words, where
+you must differentiate between the meanings. You are interested in
+quantifying the additional effort for the harder cards. For example,
+is the average number of reviews per card for cards with three answers
+on the back three times as much as the average number of reviews per
+card with one answer on the back? Or is it twenty times as much?
+
+7. You would like to recalculate the total time spent with a lower
+maximum seconds per card than the configured option.
+
 # Input Data
 
 The Python program expects a tab-delimited flat file with one
