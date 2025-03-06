@@ -6,12 +6,12 @@ and Anki provides a
 [statistics window](https://docs.ankiweb.net/stats.html#statistics)
 where users can obtain information on their studying performance for a deck.
 In total, eight to eleven figures and two text/tabular outputs are
-generated. For example, there is a histograms
+generated. For example, there is a histogram
 for the number of past reviews per day stratified by learning phase, and
 unstratified histograms of expected future reviews by day, card difficulty,
 and card retrievability.  Bar charts and a table show the number of times
-the user indicated the 'right' answer was obtained during study,
-stratifying by study hour or the various learning phases defined by
+the user indicated the 'right' answer was obtained during study
+stratified by study hour or the various learning phases defined by
 the software.
 
 The statistics window offers much flexibity in subsetting the deck population
@@ -19,9 +19,9 @@ for analysis, but each table or figure has only limited further
 customizability, often a single set of radio buttons to choose
 the length of time to display or amount of history to use in the analysis.
 Nevertheless, there are
-various use cases where additional analyses would be of interest (see
-the [Motivation](#Motivation) section below). The Anki authors acknowledge
-in the user manual there may be users interested in their own
+various use cases where additional analyses would be of interest (e.g., those
+listed in the [Motivation](#Motivation) section below). The Anki authors
+acknowledge in the user manual there may be users interested in their own
 statistics (which they call ['manual analysis'](https://docs.ankiweb.net/stats.html#manual-analysis))
 but support this only with detailed (and a bit out-of-date) documentation
 on the table logging reviews as well as unimplemented suggestions on how
@@ -35,7 +35,10 @@ programming language widely adopted and used, especially among the
 subset of users with computer programming ability but who are
 not full-blown computer scientists. It would benefit these users
 to have a Python implementation for manual analysis as well as
-improved documentation of behavior in the Rust backend.
+improved documentation of behavior in the Rust backend. Lastly,
+Python's ubiquity in the data science domain makes it a natural choice
+for this task.
+
 
 For these reasons, the purpose of this repository and documentation is to:
 
@@ -45,17 +48,18 @@ the analysis population and methods used for each table or figure)
 
 2. Provide technical documentation on key data structures and
 database fields in greater detail than that provided in the (mostly
-non-technical) [Anki Manual](https://docs.ankiweb.net).
+non-technical) [Anki Manual](https://docs.ankiweb.net)
 
 3. Provide Python code that generates tabular output that matches the
 output in the statistics window for each table or figure (although for
 brevity we omit the figure footnotes and provide code that matches only one
 radio button selection, usually the '1 month' radio button selection
 when this controls the amount of bins on a histogram x-axis and the
-'all' button otherwise).
+'all' button otherwise)
 
 In other words, for (3) above, this repository does the heavy lifting
-of the manual analyses proposed in the Anki Manual. Users can install and run the
+of the manual analyses proposed in the Anki Manual. Users can install
+and run the
 [companion data-extractor add-on](https://github.com/ghrgriner/anki-stats-extractor),
 update the parameters in `stats.py` with the path(s) to the downloaded
 file(s), and then run `stats.py` to get analysis datasets at the
@@ -71,8 +75,9 @@ the same, and similarly for figures that report review counts. Why
 is this?
 
 2. How are the tables and figures affected when studying is done in a
-Filtered deck? For example, are these reviews included when counting
-the percent of reviews that were correct?
+[filtered deck](https://docs.ankiweb.net/filtered-decks.html)? For
+example, are these reviews included when counting the percent of
+reviews that were correct?
 
 3. How are the tables and figures affected when studying is done early
 or late? For example, are these included when counting the percent
@@ -100,7 +105,7 @@ you must differentiate between the meanings. You are interested in
 quantifying the additional effort for the harder cards. For example,
 is the average number of reviews per card for cards with three answers
 on the back three times as much as the average number of reviews per
-card with one answer on the back? Or is it twenty times as much?
+card with one answer on the back? Or is it more or less?
 
 8. You would like to recalculate the total time spent with a lower
 maximum seconds per card than the configured option.
