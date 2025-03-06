@@ -1,13 +1,13 @@
 # Introduction
 
 Anki is open-source flashcard software written in Python, Qt, Rust,
-Svelte, and other languages. The cards are organized in decks,
+Svelte, and other languages. The flashcards are organized into decks,
 and Anki provides a
 [statistics window](https://docs.ankiweb.net/stats.html#statistics)
-where users can obtain information on their studying performance
-and use of the software. In total, eight to eleven figures and two
-text/tabular outputs are generated. For example, there is a histogram
-from the number of past reviews by day stratified by learning phase, and
+where users can obtain information on their studying performance for a deck.
+In total, eight to eleven figures and two text/tabular outputs are
+generated. For example, there is a histograms
+for the number of past reviews per day stratified by learning phase, and
 unstratified histograms of expected future reviews by day, card difficulty,
 and card retrievability.  Bar charts and a table show the number of times
 the user indicated the 'right' answer was obtained during study,
@@ -21,9 +21,10 @@ the amount of history to use in the analysis even though there are
 various use cases where additional analyses would be of interest (see
 the [Motivation](#Motivation) section below). The Anki authors acknowledge
 in the user manual there may be users interested in their own
-statistics (which they call ['Manual Analysis'](https://docs.ankiweb.net/stats.html#manual-analysis).
+statistics (which they call ['manual analysis'](https://docs.ankiweb.net/stats.html#manual-analysis))
 but support this only with detailed (and a bit out-of-date) documentation
-on the table logging reviews and unimplemented suggestions on how the data can be extracted.
+on the table logging reviews as well as unimplemented suggestions on how
+the data can be extracted.
 
 Anki has an add-on interface where users can write Python modules that
 interact with the software, but generation of the statistics window
@@ -37,8 +38,7 @@ improved documentation of behavior in the Rust backend.
 
 For these reasons, the purpose of this repository and documentation is to:
 
-1. Describe the statistics included in the Anki
-[statistics window](https://docs.ankiweb.net/stats.html#statistics)
+1. Describe the statistics included in the Anki statistics window
 in greater detail than that provided by the application (e.g., to describe
 the analysis population and methods used for each table or figure)
 
@@ -46,12 +46,16 @@ the analysis population and methods used for each table or figure)
 database fields in greater detail than that provided in the (mostly
 non-technical) [Anki Manual](https://docs.ankiweb.net).
 
-3. Provide Python code that generates similar output as the
-application reports
+3. Provide Python code that generates tabular output that matches the
+output in the statistics window for each table or figure (although for
+brevity we omit the figure footnotes and provide code that matches only one
+radio button selection, usually the '1 month' radio button selection
+when this controls the amount of bins on a histogram x-axis and the
+'all' button otherwise).
 
 In other words, for (3) above, this repository does the heavy lifting
-of the manual analyses proposed in the Anki Manual.  Users can install and run the
-[companion data extractor add-on](https://github.com/ghrgriner/anki-stats-extractor),
+of the manual analyses proposed in the Anki Manual. Users can install and run the
+[companion data-extractor add-on](https://github.com/ghrgriner/anki-stats-extractor),
 update the parameters in `stats.py` with the path(s) to the downloaded
 file(s), and then run `stats.py` to get analysis datasets at the
 card and review level from which they can immediately make custom
