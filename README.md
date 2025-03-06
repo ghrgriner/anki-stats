@@ -29,7 +29,8 @@ data can be extracted.
 
 Anki has [an add-on interface](https://addon-docs.ankiweb.net) where users
 can write Python modules that interact with the software.
-There are [existing add-ons](#Existing-Add-Ons-That-Create-Custom-Figures-Within-Anki) that add custom figures to the new (or legacy [see previous link]) statistics
+There are [existing add-ons](#Existing-Add-Ons-That-Create-Custom-Figures)
+that add custom figures to the new (or legacy [see previous link]) statistics
 window. However, for one-time or infrequent analyses, we believe it is not
 worth the effort of integrating the analysis into Anki. Python is a
 general-purpose programming language widely adopted and used, especially
@@ -130,18 +131,7 @@ to our Python program differs from the value used within Rust
 when creating the data for the figure. The rationale for this
 is discussed in [this post](https://forums.ankiweb.net/t/bug-retrievability-in-browser-doesnt-match-retrievability-in-stats-histogram) on Anki Forums.
 
-# Anki Version
-
-This documentation was written based on v25.02 of the Anki
-desktop application.
-
-# Repository Wiki
-
-Additional information is available on the wiki of this
-repository, which can be accessed by clicking the tab above or
-[here](https://github.com/ghrgriner/anki-stats/wiki).
-
-# Existing Add-Ons That Create Custom Figures Within Anki
+# Existing Add-Ons That Create Custom Figures
 
 We have also not previously discussed the fact that there are
 actually *two* statistics windows available in Anki: (1) the
@@ -157,8 +147,8 @@ We do not recommend developing figures for the legacy interface,
 but we mention its existence so that readers will understand what
 these terms refer to when [searching for add-ons on AnkiWeb](https://ankiweb.net/shared/addons).
 
-That being said, below are two example add-ons that provide
-custom figures in the new statistics window and the legacy
+That being said, below are two example add-ons that add
+custom figures to the new statistics window and the legacy
 statistics window.
 
 **Disclaimer**: We did not author these add-ons and we have not
@@ -172,3 +162,15 @@ should only download add-ons you trust."
    statistics window.
 2. [Progress Graphs and Stats for Learned and Matured Cards](https://ankiweb.net/shared/info/266436365): This adds two graphs to the legacy statistics
    window.
+
+# Anki Version
+
+This documentation was written based on v25.02 of the Anki
+desktop application.
+
+# Repository Wiki
+
+Additional information is available on the wiki of this
+repository, which can be accessed by clicking the tab above or
+[here](https://github.com/ghrgriner/anki-stats/wiki).
+
