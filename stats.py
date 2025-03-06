@@ -153,6 +153,7 @@ TYPE_AND_QUEUE_LABELS = {
         5: '4. Young',
         2: '5. Mature',
         -1: '6. Suspended',
+        -2: '7. Buried',  # -2 and -3 pooled for reporting
         -3: '7. Buried',
         }
 
