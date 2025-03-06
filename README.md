@@ -27,7 +27,8 @@ but support this only with detailed (and a bit out-of-date) documentation
 on the table logging reviews as well as unimplemented suggestions on how
 data can be extracted.
 
-Anki has an add-on interface where users can write Python modules that
+Anki has [an add-on interface](https://addon-docs.ankiweb.net) where users
+can write Python modules that
 interact with the software, but generation of the statistics window
 is almost completely done in Rust and Svelte, thereby making add-on
 integration more difficult. Furthermore, Python is a general-purpose
