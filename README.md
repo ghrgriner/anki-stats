@@ -40,7 +40,6 @@ improved documentation of behavior in the Rust backend. Lastly,
 Python's ubiquity in the data science domain makes it a natural choice
 for this task.
 
-
 For these reasons, the purpose of this repository and documentation is to:
 
 1. Describe the statistics included in the Anki statistics window
@@ -61,7 +60,7 @@ when this controls the amount of bins on a histogram x-axis and the
 In other words, for (3) above, this repository does the heavy lifting
 of the manual analyses proposed in the Anki Manual. Users can install
 and run the
-[companion data-extractor add-on](https://github.com/ghrgriner/anki-stats-extractor),
+[companion data-exporter add-on](https://github.com/ghrgriner/anki-stats-exporter),
 update the parameters in `stats.py` with the path(s) to the downloaded
 file(s), and then run `stats.py` to get analysis datasets at the
 card and review level from which they can immediately make custom
