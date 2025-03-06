@@ -22,7 +22,7 @@ in the Anki Statistics window outside of the Anki application using an export
 file that is one record per card. This program does not generate every value
 found in the Anki Statistics window. However, for every report it provides the
 variables used to define the analysis population as well as the outcome
-variable analyzed in the chart/text (if applicable).
+variable analyzed in the figure/text (if applicable).
 
 The input file should be tab-delimited with '"' as the quote character and
 should contain at least the following columns:
@@ -474,7 +474,7 @@ else:
 df_r_and_c = df_cards.merge(df_reviews, how='left', on='c_id')
 
 #------------------------------------------------------------------------------
-# 3. Create tables matching the text/figures/charts from the Anki `Stats`
+# 3. Create tables matching the text/tables/figures from the Anki `Stats`
 # window.
 #------------------------------------------------------------------------------
 
@@ -565,7 +565,7 @@ freq(df_cards_m, ['diff_bin_label'],
 
 # TODO: doesn't match, bug reported. I believe the retrievability passed back
 # to Python from the Rust backend doesn't match the retrievability calculated
-# when making the chart in the `Stats` window, as they are calling different
+# when making the figure in the `Stats` window, as they are calling different
 # functions to calculate the `days_elapsed` that is an input to the
 # retrievability calculation.
 freq(df_cards, 'bin_retr_label',
@@ -599,7 +599,7 @@ print_retention_row(desc='Last year',  start_day=-364, end_day=0)
 print_retention_row(desc='All time',   start_day=None, end_day=0)
 
 #------------------------------------------------------------------------------
-# 4. Create custom chart(s) that are not available in the Anki `Stats` window.
+# 4. Create custom figure(s) that are not available in the Anki `Stats` window.
 # As an example, here we repeat Figure 4 stratified by card type.
 #------------------------------------------------------------------------------
 
