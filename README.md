@@ -14,13 +14,13 @@ the user indicated the 'right' answer was obtained during study
 stratified by study hour or the various learning phases defined by
 the software.
 
-The statistics window offers much flexibity in subsetting the deck population
+The statistics window offers much flexibility in sub-setting the deck population
 for analysis, but each table or figure has only limited further
 customizability, often a single set of radio buttons to choose
 the length of time to display or amount of history to use in the analysis.
 Nevertheless, there are
-various use cases where additional analyses would be of interest (e.g., those
-listed in the [Motivation](#Motivation) section below). The Anki authors
+[various use cases](#Motivation) where additional analyses would be of interest.
+The Anki authors
 acknowledge in the user manual there may be users interested in their own
 statistics (which they call ['manual analysis'](https://docs.ankiweb.net/stats.html#manual-analysis))
 but support this only with detailed (and a bit out-of-date) documentation
@@ -28,17 +28,15 @@ on the table logging reviews as well as unimplemented suggestions on how
 data can be extracted.
 
 Anki has [an add-on interface](https://addon-docs.ankiweb.net) where users
-can write Python modules that
-interact with the software, but generation of the statistics window
-is almost completely done in Rust and Svelte, thereby making add-on
-integration more difficult. Furthermore, Python is a general-purpose
-programming language widely adopted and used, especially among the
-subset of users with computer programming ability but who are
+can write Python modules that interact with the software.
+There are [existing add-ons](#Existing-Add-Ons-That-Create-Custom-Figures-Within-Anki) that add custom figures to the new (or legacy [see previous link]) statistics
+window. However, for one-time or infrequent analyses, we believe it is not
+worth the effort of integrating the analysis into Anki. Python is a
+general-purpose programming language widely adopted and used, especially
+among the subset of users with computer programming ability who are
 not full-blown computer scientists. It would benefit these users
 to have a Python implementation for manual analysis as well as
-improved documentation of behavior in the Rust backend. Lastly,
-Python's ubiquity in the data science domain makes it a natural choice
-for this task.
+improved documentation of behavior in the Rust backend.
 
 For these reasons, the purpose of this repository and documentation is to:
 
@@ -84,7 +82,7 @@ or late? For example, are these included when counting the percent
 of reviews that were correct? Does it matter how early or late the
 review was?
 
-4. How are the tables and figures affects affected when cards are
+4. How are the tables and figures affected when cards are
 reset or deleted?
 
 5. Where are the Free Spaced Repeptition Scheduler (FSRS) variables
@@ -107,7 +105,10 @@ is the average number of reviews per card for cards with three answers
 on the back three times as much as the average number of reviews per
 card with one answer on the back? Or is it more or less?
 
-8. You would like to recalculate the total time spent with a lower
+8. Two or more users are studying identical decks, and they would
+like to compare their performance at the level of individual cards.
+
+9. You would like to recalculate the total time spent with a lower
 maximum seconds per card than the configured option.
 
 # Input Data
@@ -140,3 +141,34 @@ Additional information is available on the wiki of this
 repository, which can be accessed by clicking the tab above or
 [here](https://github.com/ghrgriner/anki-stats/wiki).
 
+# Existing Add-Ons That Create Custom Figures Within Anki
+
+We have also not previously discussed the fact that there are
+actually *two* statistics windows available in Anki: (1) the
+(new) window accessible by pushing the `Stats` button, and
+(2) the legacy window accessible by pushing `SHIFT + Stats`.
+The default graphs in the legacy window offers fewer
+figures and less filtering and interaction capabilities than
+the new window. Figures in the legacy window are created by
+creating strings that contain HTML and Javascript in Python
+rather than using Rust and Svelte.
+
+We do not recommend developing figures for the legacy interface,
+but we mention its existence so that readers will understand what
+these terms refer to when [searching for add-ons on AnkiWeb](https://ankiweb.net/shared/addons).
+
+That being said, below are two example add-ons that provide
+custom figures in the new statistics window and the legacy
+statistics window.
+
+**Disclaimer**: We did not author these add-ons and we have not
+inspected their code. As AnkiWeb states: "As add-ons are programs
+downloaded from the internet, they are potentially malicious. You
+should only download add-ons you trust."
+
+1. [Search Stats Extended](https://ankiweb.net/shared/info/1613056169):
+   This add-on adds 20 graphs to the (non-legacy) statistics window.
+   This is the only add-on we are aware of that manipulates the new
+   statistics window.
+2. [Progress Graphs and Stats for Learned and Matured Cards](https://ankiweb.net/shared/info/266436365): This adds two graphs to the legacy statistics
+   window.
