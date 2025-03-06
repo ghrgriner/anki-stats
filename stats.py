@@ -563,11 +563,8 @@ freq(df_cards_m, ['diff_bin_label'],
      where=~pd.isnull(df_cards.scaled_difficulty))
      #where=(df_cards_m.diff_bin_label != ''))
 
-# TODO: doesn't match, bug reported. I believe the retrievability passed back
-# to Python from the Rust backend doesn't match the retrievability calculated
-# when making the figure in the `Stats` window, as they are calling different
-# functions to calculate the `days_elapsed` that is an input to the
-# retrievability calculation.
+# This might not match the `Stats` window exactly. See Limitations section of
+# the repository README.
 freq(df_cards, 'bin_retr_label',
      title='Table 10: Card Retrievability (FSRS desks only)',
      where=~pd.isnull(df_cards.scaled_difficulty))

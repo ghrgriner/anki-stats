@@ -19,10 +19,12 @@ an easier starting point than the existing Svelte and Rust
 code for users who wish to create custom reports.
 
 In other words, for (2) above, this repository does the preliminary work
-of the [manual analysis proposed in the Anki Manual](https://docs.ankiweb.net/stats.html#manual-analysis).
-Users can run the program and get analysis datasets at the card
-and review level that they can immediately feed into `matplotlib`
-or other graphics module to make their own figures.
+of the [manual analyses proposed in the Anki Manual](https://docs.ankiweb.net/stats.html#manual-analysis).
+Users can run the [companion data extractor](https://github.com/ghrgriner/anki-stats-extractor),
+update the parameters in `stats.py` with the path(s) to the downloaded
+file(s) and then run `stats.py` and get analysis datasets at the
+card and review level from which they can immediately make custom
+tables and figures.
 
 The documentation in this repository does not include discussion
 on the interpretation of the outcome variables themselves, such
