@@ -73,15 +73,17 @@ from prepare_data import create_cards, create_reviews
 # Parameters (for modification by user)
 #------------------------------------------------------------------------------
 INPUT_FILE = 'input/cards.csv'
-#INPUT_FILE = 'input/collection.anki2'
 
-# Set to INPUT_MODE_TEXT if using exported text file or INPUT_MODE_SQLITE if
-# INPUT_FILE is path to the collection.anki2 file
+# We recommend using INPUT_MODE_TEXT. If INPUT_MODE_SQLITE is used, the
+# INPUT_FILE must be the path to a collection.anki2 file. We only provide a
+# connection function in `db.py` that is meant to open the database read-only,
+# but nevertheless, you should not attempt to write to the Anki database as
+# this can easily corrupt the collection. Therefore, only use INPUT_MODE_SQLITE# if you have reviewed the code in this package and are satisfied with the
+# database operations being performed.
 INPUT_MODE = INPUT_MODE_TEXT
-#INPUT_MODE = INPUT_MODE_SQLITE
 
-# Only used when INPUT_MODE_SQLITE to filter the cards, since all cards in
-# collection retrieved from database
+# Only used when INPUT_MODE_SQLITE to filter the cards (if desired), since all
+# cards in collection retrieved from database
 DECK_NAME = None
 
 # Path to optional input file if user wants to use additional fields export
@@ -193,6 +195,7 @@ freq(df_reviews, 'correct_answer', percent=True,
             & (df_reviews.review_relative_days == 0)
             & (df_reviews.lastivl >= 21)))
 
+# TODO: due_days not yet calculated for INPUT_MODE_SQLITE
 if INPUT_MODE == INPUT_MODE_TEXT:
     freq(df_cards_m, 'due_days', percent=True,
          title='Table 2: Future Due',
@@ -262,7 +265,7 @@ freq(df_cards_m, ['diff_bin_label'],
 
 # When INPUT_MODE_TEXT, this might not match the `Stats` window exactly.
 # See Limitations section of the repository README.
-# TODO: when INPUT_MODE_SQLITE, need to add code
+# TODO: retrievability not yet calculated for INPUT_MODE_SQLITE
 if INPUT_MODE == INPUT_MODE_TEXT:
     freq(df_cards, 'bin_retr_label',
         title='Table 10: Card Retrievability (FSRS desks only)',
