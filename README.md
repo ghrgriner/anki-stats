@@ -88,7 +88,7 @@ reset or deleted?
 
 5. Where are the Free Spaced Repeptition Scheduler (FSRS) variables
 (difficulty, stability, etc...) stored in the database and with
-what precision are the stored?
+what precision are they stored?
 
 6. You are studying a foreign language and you have two different
 card types: one with your target language on the front and the other
