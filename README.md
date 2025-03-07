@@ -137,7 +137,7 @@ We have also not previously discussed the fact that there are
 actually *two* statistics windows available in Anki: (1) the
 (new) window accessible by pushing the `Stats` button, and
 (2) the legacy window accessible by pushing `SHIFT + Stats`.
-The default graphs in the legacy window offers fewer
+The default graphs in the legacy window offer fewer
 figures and less filtering and interaction capabilities than
 the new window. Figures in the legacy window are created by
 creating strings that contain HTML and Javascript in Python
@@ -145,7 +145,7 @@ rather than using Rust and Svelte.
 
 We do not recommend developing figures for the legacy interface,
 but we mention its existence so that readers will understand what
-these terms refer to when [searching for add-ons on AnkiWeb](https://ankiweb.net/shared/addons).
+these terms refer to if [searching for add-ons on AnkiWeb](https://ankiweb.net/shared/addons).
 
 That being said, below are two example add-ons that add
 custom figures to the new statistics window and the legacy
