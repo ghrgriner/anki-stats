@@ -19,7 +19,6 @@
 """
 
 import csv
-import sys
 
 import pandas as pd
 
@@ -36,7 +35,7 @@ from standard_output import print_stats_tables
 #------------------------------------------------------------------------------
 # Functions
 #------------------------------------------------------------------------------
-def main():
+def main() -> None:
     pd.set_option('display.max_rows', PD_DISPLAY_MAX_ROWS)
 
     if INPUT_MODE == INPUT_MODE_SQLITE: db.connect_readonly(INPUT_FILE)
@@ -102,5 +101,6 @@ def main():
 #------------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    sys.exit(main())
+    #sys.exit(main())
+    main()
 

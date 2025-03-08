@@ -21,7 +21,7 @@
 import datetime
 import math
 import time
-#from typing import NewType
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -41,7 +41,7 @@ from consts import (
     )
 from other_functions import (bin_label_from_index, get_days_round_to_zero,
     make_diff_bin, make_ease_bin, round_away, get_next_day_start,
-    get_local_offset, strip_last5, get_json_val, str_or_num_to_int_or_nan)
+    strip_last5, get_json_val, to_int_or_nan)
 
 #------------------------------------------------------------------------------
 # Parameters (for modification by user)
@@ -55,11 +55,7 @@ pd.set_option('display.max_rows',500)
 #------------------------------------------------------------------------------
 # Functions
 #------------------------------------------------------------------------------
-def get_hour_from_secs(x, offset):
-    """Return local hour from seconds in epoch time."""
-    return math.floor(((float(x) - offset) / 3600) % 24)
-
-def get_rollover_from_cards(df):
+def get_rollover_from_cards(df: pd.DataFrame) -> int:
     """Get rollover hour from first row and 'col_RolloverHour' col of df.
     """
     return int(df.iloc[0, df.columns.get_loc('col_RolloverHour')])
@@ -72,8 +68,7 @@ def get_rollover_from_cards(df):
 # 1a. Read cards where fields were manually selected (because fields like the
 #   review history are not available through the browser).
 #------------------------------------------------------------------------------
-#rows_to_keep = [0,2]
-def create_cards(input_file, input_mode):
+def create_cards(input_file: str, input_mode: int) -> pd.DataFrame:
     """Create data frame that is one record per card.
     """
     if input_mode == INPUT_MODE_TEXT:
@@ -116,19 +111,22 @@ def create_cards(input_file, input_mode):
     df['added_days'] = ((
         (df.added_millis / 1000).map(datetime.datetime.fromtimestamp)
          - next_day_start).dt.total_seconds() / SECS_IN_DAY).map(math.ceil)
+
     if input_mode == INPUT_MODE_SQLITE:
         df['c_difficulty'] = df.c_data.map(lambda x: get_json_val(x, 'd'))
         df['c_stability'] = df.c_data.map(lambda x: get_json_val(x, 's'))
     else: pass    # pass: in this case, already in data frame
+
     df['stability_rounded'] = df.c_stability.map(round_away)
     df['ease_label'] = df.c_factor.map(make_ease_bin)
     df['scaled_difficulty'] = 100*(df.c_difficulty - 1) / 9
     df['diff_bin_label'] = df.scaled_difficulty.map(make_diff_bin)
+
     if input_mode == INPUT_MODE_SQLITE:
         timing_config = timing.TimingConfig()
         days_elapsed = timing.sched_timing_today(
             creation_secs=timing.TimestampSecs(timing_config.creation_stamp),
-            current_secs=timing.TimestampSecs(time.time()),
+            current_secs=timing.TimestampSecs(int(math.floor(time.time()))),
             creation_utc_offset=timing_config.creation_offset,
             current_utc_offset=timing_config.local_offset,
             rollover_hour=timing_config.rollover_hour).days_elapsed
@@ -149,14 +147,20 @@ def create_cards(input_file, input_mode):
 
     return df
 
-def create_reviews(input_mode, cards_df=None):
+def create_reviews(input_mode: int, cards_df: Optional[pd.DataFrame]=None
+                  ) -> pd.DataFrame:
     if input_mode == INPUT_MODE_TEXT:
-        df = pd.DataFrame(cards_df.revlog_entries.map(strip_last5).str.split(
-                 '-----', expand=True).stack(), columns=['revlog_entries2'])
-        df[['date_millis', 'review_kind', 'ease', 'ivl', 'lastivl',
-           'taken_millis', 'factor']
-          ] = df.revlog_entries2.str.split('#', expand=True)
-        df.index.set_names(['c_id','seq'], inplace=True)
+        if cards_df is None:
+            raise ValueError('cards_df cannot be None when '
+                             'input_mode == INPUT_MODE_TEXT')
+        else:
+            df = pd.DataFrame(cards_df.revlog_entries.map(
+             strip_last5).str.split('-----', expand=True).stack(),
+                     columns=['revlog_entries2'])
+            df[['date_millis', 'review_kind', 'ease', 'ivl', 'lastivl',
+                'taken_millis', 'factor']
+              ] = df.revlog_entries2.str.split('#', expand=True)
+            df.index.set_names(['c_id','seq'], inplace=True)
     else:
         df = db.read_sql_query('select * from revlog')
         #id cid usn ease ivl lastIvl factor time type
@@ -165,21 +169,24 @@ def create_reviews(input_mode, cards_df=None):
                         'type': 'review_kind',
                         'lastIvl': 'lastivl',
                         'time': 'taken_millis'}, axis=1)
-        df = df.merge(cards_df[['added_millis']], how='inner', left_on='c_id',
-                      right_on='added_millis', suffixes=(None, '_y'))
+        if cards_df is not None:
+            df = df.merge(cards_df[['added_millis']], how='inner',
+                          left_on='c_id', right_on='added_millis',
+                          suffixes=(None, '_y'))
 
     rollover_hour = get_rollover_from_cards(cards_df)
     next_day_start = get_next_day_start(rollover_hour)
-    offset = get_local_offset()
+    offset = timing.get_python_local_offset()
 
     # these next two are str from INPUT_MODE_TEXT and num otherwise
-    df['factor'] = df.factor.map(str_or_num_to_int_or_nan)
-    df['ease'] = df.ease.map(str_or_num_to_int_or_nan)
+    df['factor'] = df.factor.map(to_int_or_nan)
+    df['ease'] = df.ease.map(to_int_or_nan)
     df['date_secs'] = df.date_millis.map(lambda x: float(x)/1000)
     df['taken'] = df.taken_millis.map(lambda x: float(x)/1000)
     df = df.astype({'lastivl': int, 'ivl': int,
                     'review_kind': int, 'taken': float})
-    df['review_hr'] = df.date_secs.map(lambda x: get_hour_from_secs(x, offset))
+    df['review_hr'] = df.date_secs.map(
+                    lambda x: timing.get_hour_from_secs(x, offset))
 
     df['review_datetime'] = df.date_secs.map(
           datetime.datetime.fromtimestamp)
@@ -219,7 +226,6 @@ def create_reviews(input_mode, cards_df=None):
     # True / False / None
     df['correct_answer'] = (np.where(df.ease == 0,
                                              None, (df.ease > 1)))
-    #df['correct'] = (np.where(df.retention_pop,
-    #                                  (df.ease > 1).astype(int), np.nan))
 
     return df
+

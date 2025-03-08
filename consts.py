@@ -27,6 +27,9 @@ SECS_IN_DAY = 24 * 60 * 60
 INPUT_MODE_TEXT = 1
 INPUT_MODE_SQLITE = 2
 
+OFFSET_SOURCE_DB = 0
+OFFSET_SOURCE_PYTHON = 1
+
 # Queue types
 # use same const names and values as pylib/anki/consts.py
 #CardQueue = NewType('CardQueue', int)
@@ -108,3 +111,4 @@ TYPE_AND_QUEUE_LABELS = {
         -2: '7. Buried',  # -2 and -3 pooled for reporting
         -3: '7. Buried',
         }
+

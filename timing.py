@@ -20,10 +20,14 @@
 
 from dataclasses import dataclass
 import datetime
-from typing import Optional
+import math
+import time
+from typing import Optional, Union
 
 import db
+import pandas as pd
 
+from consts import OFFSET_SOURCE_DB, OFFSET_SOURCE_PYTHON
 from other_functions import get_days_round_to_zero
 
 #------------------------------------------------------------------------------
@@ -32,12 +36,12 @@ from other_functions import get_days_round_to_zero
 class TimestampSecs:
     val: int
 
-    def datetime(self, offset):
+    def datetime(self, offset: int) -> datetime.datetime:
         """Return tz-aware datetime object with the given offset."""
         timezone = datetime.timezone(datetime.timedelta(hours=-offset/60))
         return datetime.datetime.fromtimestamp(self.val, tz=timezone)
 
-    def __init__(self, val):
+    def __init__(self, val: int):
         self.val = val
 
 @dataclass
@@ -47,6 +51,7 @@ class SchedTimingToday:
     days_elapsed: int
     #next_day_at: TimestampSecs
 
+@dataclass
 class TimingConfig:
     """Collection-specific timing information from the database.
 
@@ -56,10 +61,14 @@ class TimingConfig:
         Hour defining start of each day (0-23)
     creation_offset : Optional[int]
         Time-zone offset (in minutes) when collection was created
-    local_offset : Optional[int]
+    local_offset : int
         Current local time-zone offset (in minutes) for the collection.
-        This is obtained from the Anki collection and not, for example,
-        by querying the operating system.
+        See `local_offset_source` for details.
+    local_offset_source : int (OFFSET_SOURCE_DB, OFFSET_SOURCE_PYTHON)
+        `local_offset` will be taken from the database if available, but
+        on older databases, it might not be present and is then taken
+        from the Python time package. See `get_local_offset` for
+        details.
     sched_ver : Optional[int]
         Anki scheduling version. Valid values: 1 or 2.
     creation_stamp : int
@@ -67,16 +76,23 @@ class TimingConfig:
     """
     rollover_hour: Optional[int]
     creation_offset: Optional[int]
-    local_offset: Optional[int]
+    local_offset: int
+    local_offset_source: int
     sched_ver: Optional[int]
     creation_stamp: int
 
-    def __init__(self):
+    def __init__(self) -> None:
         df_config = db.read_sql_query('select * from config')
         df_config.set_index(['KEY'], verify_integrity=True, inplace=True)
         self.rollover_hour = _get_opt_int(df_config, 'rollover')
         self.creation_offset = _get_opt_int(df_config, 'creationOffset')
-        self.local_offset = _get_opt_int(df_config, 'localOffset')
+        local_offset = _get_opt_int(df_config, 'localOffset')
+        if local_offset is not None:
+            self.local_offset = local_offset
+            self.local_offset_source = OFFSET_SOURCE_DB
+        else:
+            self.local_offset = round(get_python_local_offset() / 60)
+            self.local_offset_source = OFFSET_SOURCE_PYTHON
         self.sched_ver = _get_opt_int(df_config, 'schedVer')
         df_col = db.read_sql_query('select crt from col')
         self.creation_stamp = df_col.iloc[0, 0]
@@ -84,7 +100,7 @@ class TimingConfig:
 #------------------------------------------------------------------------------
 # Functions
 #------------------------------------------------------------------------------
-def _get_opt_int(df, key) -> Optional[int]:
+def _get_opt_int(df: pd.DataFrame, key: str) -> Optional[int]:
     if key in df.index:
         return int(df.at[key,'val'].decode('utf-8'))
     else:
@@ -92,32 +108,42 @@ def _get_opt_int(df, key) -> Optional[int]:
 
 # For most of the rest, see: timing.rs in Anki repo
 
-def rollover_datetime(date, rollover_hour):
+def rollover_datetime(date: datetime.datetime,
+                      rollover_hour: int) -> datetime.datetime:
     """Return tz-aware datetime object, date as input, hour=rollover_hour."""
     newdate = date.replace(hour=rollover_hour, minute=0, second=0,
                            microsecond=0)
     return newdate
 
 
-def days_elapsed_(start_date, end_date, rollover_passed):
+def days_elapsed_(start_date: datetime.datetime,
+                  end_date: datetime.datetime,
+                  rollover_passed: bool) -> int:
     day_diff = (end_date - start_date).days
     if rollover_passed:
         return day_diff
     else:
         return day_diff - 1
 
-def sched_timing_today_v1(crt, now):
-    days_elapsed = get_days_round_to_zero(now - crt)
+def sched_timing_today_v1(crt: TimestampSecs,
+                          now: TimestampSecs) -> SchedTimingToday:
+    days_elapsed = get_days_round_to_zero(now.val - crt.val)
     return SchedTimingToday(now=now, days_elapsed=days_elapsed)
 
-def sched_timing_today_v2_legacy(crt, rollover, now, current_utc_offset):
+def sched_timing_today_v2_legacy(crt: TimestampSecs,
+                                 rollover: int,
+                                 now: TimestampSecs,
+                                 current_utc_offset: int) -> SchedTimingToday:
     crt_at_rollover = rollover_datetime(crt.datetime(current_utc_offset),
                                         rollover).timestamp()
     days_elapsed = get_days_round_to_zero(now.val - crt_at_rollover)
     return SchedTimingToday(now=now, days_elapsed=days_elapsed)
 
-def sched_timing_today_v2_new(creation_secs, creation_utc_offset,
-        current_secs, current_utc_offset, rollover_hour):
+def sched_timing_today_v2_new(creation_secs: TimestampSecs,
+                              current_secs: TimestampSecs,
+                              creation_utc_offset: int,
+                              current_utc_offset: int,
+                              rollover_hour: int) -> SchedTimingToday:
     created_datetime = creation_secs.datetime(creation_utc_offset)
     now_datetime = current_secs.datetime(current_utc_offset)
 
@@ -129,33 +155,55 @@ def sched_timing_today_v2_new(creation_secs, creation_utc_offset,
 		    rollover_passed)
     return SchedTimingToday(now=current_secs, days_elapsed=days_elapsed)
 
-def sched_timing_today(creation_secs, current_secs, creation_utc_offset,
-                       current_utc_offset, rollover_hour):
+def sched_timing_today(creation_secs: TimestampSecs,
+                       current_secs: TimestampSecs,
+                       creation_utc_offset: Optional[int],
+                       current_utc_offset: int,
+                       rollover_hour: Optional[int]) -> SchedTimingToday:
     if rollover_hour is None:
         return sched_timing_today_v1(creation_secs, current_secs)
     elif creation_utc_offset is None:
         return sched_timing_today_v2_legacy(creation_secs,
                  rollover_hour, current_secs, current_utc_offset)
     else:
-        return sched_timing_today_v2_new(creation_secs,
-                 creation_utc_offset, current_secs, current_utc_offset,
-                 rollover_hour)
+        return sched_timing_today_v2_new(creation_secs, current_secs,
+                 creation_utc_offset, current_utc_offset, rollover_hour)
 
-def timing_for_timestamp(now, timing_config, creation_stamp):
-    #  rollover_hour, creation_offset, local_offset, sched_ver
-    print(timing_config)
-    if timing_config['sched_ver'] == 1:
+def timing_for_timestamp(now: TimestampSecs,
+                         timing_config: TimingConfig,
+                         creation_stamp: TimestampSecs,
+                        ) -> SchedTimingToday:
+    if timing_config.sched_ver == 1:
         rollover_hour = None
-    elif timing_config['sched_ver'] == 2:
-        if timing_config['rollover_hour'] is None:
+    elif timing_config.sched_ver == 2:
+        if timing_config.rollover_hour is None:
             rollover_hour = 4
         else:
-            rollover_hour = timing_config['rollover_hour']
+            rollover_hour = timing_config.rollover_hour
     else:
         raise ValueError(
-            f"{timing_config['sched_ver']=}, only 1 or 2 supported")
+            f'{timing_config.sched_ver=}, only 1 or 2 supported')
     return sched_timing_today(creation_stamp,
                               now,
-                              timing_config['creation_offset'],
-                              timing_config['local_offset'],
+                              timing_config.creation_offset,
+                              timing_config.local_offset,
                               rollover_hour)
+
+def get_python_local_offset() -> int:
+    """Return local timezone offset from Python time package.
+
+    return time.altzone if time.localtime().tm_isdst else time.timezone
+
+    Returns
+    -------
+    An integer as seconds west of UTC according to the code above.
+    """
+    if time.localtime().tm_isdst:
+        return time.altzone
+    else:
+        return time.timezone
+
+def get_hour_from_secs(x: Union[float,int], offset: int) -> int:
+    """Return local hour from seconds in epoch time."""
+    return math.floor(((float(x) - offset) / 3600) % 24)
+

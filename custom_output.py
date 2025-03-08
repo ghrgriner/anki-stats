@@ -19,6 +19,7 @@
 """
 
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 from parameters import INPUT_MODE
@@ -27,7 +28,7 @@ from consts import INPUT_MODE_TEXT
 #------------------------------------------------------------------------------
 # Functions
 #------------------------------------------------------------------------------
-def stacked_bar(df, var, group, outfile):
+def stacked_bar(df: pd.DataFrame, var, group, outfile) -> None:
     """Create and save a stacked bar chart with bins 0, 1, ..., 30."""
     df = df[df[var].notna()]
     groups = df[group].unique()
@@ -39,7 +40,7 @@ def stacked_bar(df, var, group, outfile):
     plt.legend()
     plt.savefig(outfile)
 
-def create_all_custom_figures(df_cards):
+def create_all_custom_figures(df_cards: pd.DataFrame) -> None:
     df = df_cards[ df_cards.c_type != 0 ]
     # TODO: remove condition when `due_days` implemented for INPUT_MODE_SQLITE
     if INPUT_MODE == INPUT_MODE_TEXT:
@@ -49,3 +50,4 @@ def create_all_custom_figures(df_cards):
     #etc...
     #df.hist(column = 'c_ivl')
     #plt.hist(df.due_days, bins=np.linspace(0, 30, 31), rwidth=.90)
+

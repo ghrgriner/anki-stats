@@ -23,7 +23,7 @@ from consts import INPUT_MODE_TEXT, INPUT_MODE_SQLITE # pylint: disable=unused-i
 #------------------------------------------------------------------------------
 # Parameters (for modification by user)
 #------------------------------------------------------------------------------
-INPUT_FILE = 'input/cards.csv'
+INPUT_FILE = 'input/collection.anki2'
 
 # We recommend using INPUT_MODE_TEXT. If INPUT_MODE_SQLITE is used, the
 # INPUT_FILE must be the path to a collection.anki2 file. We only provide a
@@ -32,11 +32,11 @@ INPUT_FILE = 'input/cards.csv'
 # this can easily corrupt the collection. Therefore, only use INPUT_MODE_SQLITE
 # if you have reviewed the code in this package and are satisfied with the
 # database operations being performed.
-INPUT_MODE = INPUT_MODE_TEXT
+INPUT_MODE = INPUT_MODE_SQLITE
 
 # Only used when INPUT_MODE == INPUT_MODE_SQLITE to filter the cards (if
 # desired), since all cards in the collection are retrieved from database
-DECK_NAME = None
+DECK_NAME = 'SPDEFull'
 
 # Path to optional input file if user wants to use additional fields export
 # from the browser (see corresponding export program).

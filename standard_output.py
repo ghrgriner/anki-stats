@@ -19,6 +19,7 @@
 """
 
 import datetime
+from typing import Optional
 
 import pandas as pd
 
@@ -36,7 +37,9 @@ from other_functions import print_time, freq
 #------------------------------------------------------------------------------
 # Functions
 #------------------------------------------------------------------------------
-def print_retention_row(df, desc, start_day, end_day):
+def print_retention_row(df: pd.DataFrame, desc: Optional[str],
+                        start_day: Optional[int], end_day: Optional[int]
+                       ) -> None:
     """Print a row of the retention table."""
     if start_day is not None:
         df_ = df[  (df.review_relative_days >= start_day)
@@ -44,7 +47,7 @@ def print_retention_row(df, desc, start_day, end_day):
     else:
         df_ = df
 
-    def get_pct(subset=None):
+    def get_pct(subset=None) -> str:
         if subset is not None:
             df3_ = df_[subset]
         else:
@@ -66,7 +69,8 @@ def print_retention_row(df, desc, start_day, end_day):
     print(f'{desc:<11}{young_pct:>10}{mature_pct:>10}{total_pct:>10}'
           f'{len(df_):>10}')
 
-def print_stats_tables(df_cards=None, df_reviews=None, df_r_and_c=None):
+def print_stats_tables(df_cards=None, df_reviews=None, df_r_and_c=None
+                      ) -> None:
     #--------------------------------------------------------------------------
     # 3. Create tables matching the text/tables/figures from the Anki `Stats`
     # window.

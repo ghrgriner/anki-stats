@@ -20,22 +20,25 @@
 
 import datetime
 import math
-import time
 import json
 
 import numpy as np
 import pandas as pd
+from typing import Union, Optional
 
 from consts import SECS_IN_DAY
 
 #------------------------------------------------------------------------------
 # Functions
 #------------------------------------------------------------------------------
-def strip_last5(x):
+def strip_last5(x: str) -> Optional[str]:
     """Convert input to str and remove last five characters."""
     x = str(x)
     len_x = len(x)
-    if len_x>5: return x[0:(len_x - 5)]
+    if len_x>5:
+        return x[0:(len_x - 5)]
+    else:
+        return None
 
 # bins are [x, x+5) and [95%, 100%]
 #def make_bin(x):
@@ -46,7 +49,7 @@ def strip_last5(x):
 #    else: bin_label = f'[{5*(bin_num)}%, {5*(bin_num+1)}%)'
 #    return bin_label
 
-def print_time(val):
+def print_time(val: float) -> str:
     """Print input time (in hours) as hours, minutes, or seconds."""
     if val > 1:
         return f'{val:.2f} hours'
@@ -55,7 +58,7 @@ def print_time(val):
     else:
         return f'{(val*3600):.2f} seconds'
 
-def bin_label_from_index(val):
+def bin_label_from_index(val: float) -> str:
     """Given index of bin (0-19) or 20, return the bin label."""
     if np.isnan(val):
         return ''
@@ -64,17 +67,25 @@ def bin_label_from_index(val):
     else:
         return f'[{int(val*5)}%, {int(val+1)*5}%)'
 
-def str_or_num_to_int_or_nan(val):
+def to_int_or_nan(val: Union[str, int, float, None]
+                 ) -> Union[int,float]:
+    """Convert input string or number to int if present or np.nan if missing.
+
+    Program should still work even if it didn't search for the NoneType or
+    a string saying 'None', but it doesn't seem to hurt to also include.
+    """
     if isinstance(val, str):
-        if val:
+        if val and val != 'None':
             return int(val)
         else:
+            return np.nan
+    elif val is None:
             return np.nan
     else:
         return int(val)
 
 def freq(df_, var, title=None, where=None, percent=False,
-         weight=None, format_val=None, dropna=True):
+         weight=None, format_val=None, dropna=True) -> None:
     """Print table giving frequencies or weighted sums."""
     if isinstance(var, str):
         row_vars = [var]
@@ -107,16 +118,21 @@ def freq(df_, var, title=None, where=None, percent=False,
 
     if title:
         print(title)
-    print(f'{freq_}')
+    if len(freq_)>0:
+        print(f'{freq_}')
+    else:
+        # Table 1 says 'No cards have been studied today', but
+        # it seems better to keep it general.
+        print('[No observations meet the criteria.]')
 
-def get_days_round_to_zero(x):
+def get_days_round_to_zero(x: Union[int, float]) -> int:
     """Convert seconds to days, rounding towards zero."""
     if x < 0:
-        return -1 * (-x // SECS_IN_DAY)
+        return int(-1 * (-x // SECS_IN_DAY))
     else:
-        return x // SECS_IN_DAY
+        return int(x // SECS_IN_DAY)
 
-def make_diff_bin(x):
+def make_diff_bin(x: Optional[Union[int, float]]) -> str:
     if not x:
         return ''
     else:
@@ -128,7 +144,7 @@ def make_diff_bin(x):
         else:
             return f'[{5*(bin_num)}%, {5*(bin_num+1)}%)'
 
-def make_ease_bin(x):
+def make_ease_bin(x: Union[int, float]) -> str:
     if not x:
         return ''
     elif math.isnan(x):
@@ -140,7 +156,7 @@ def make_ease_bin(x):
 # internet suggests default round in rust is round-to-even, but testing
 # Anki suggests it is using round-away from zero. Default in Python is
 # round-to-even, so a custom round function is written.
-def round_away(x):
+def round_away(x: Union[int, float]) -> Union[int, float]:
     """Round x away from zero."""
     if math.isnan(x):
         return x
@@ -151,7 +167,7 @@ def round_away(x):
     else:
         return np.round(x)
 
-def get_next_day_start(rollover_hour):
+def get_next_day_start(rollover_hour: int) -> pd.Timestamp:
     """Return date/time of the next start day (i.e., today or tomorrow)."""
     if rollover_hour == 0:
         return (pd.Timestamp(datetime.date.today())
@@ -163,14 +179,7 @@ def get_next_day_start(rollover_hour):
         return (pd.Timestamp(datetime.date.today())
                 + datetime.timedelta(days = 1, hours = rollover_hour))
 
-def get_local_offset():
-    """Return local timezone offset."""
-    if time.localtime().tm_isdst:
-        return time.altzone
-    else:
-        return time.timezone
-
-def get_json_val(x, key):
+def get_json_val(x: str, key: str) -> float:
     if not x:
         return np.nan
     else:

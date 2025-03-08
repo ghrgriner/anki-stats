@@ -19,25 +19,29 @@
 """
 
 import os
+from typing import Optional
 
 import sqlite3
 import pandas as pd
 
-_DB_CON = None
+_DB_CON: Optional[sqlite3.Connection] = None
 
 #------------------------------------------------------------------------------
 # Functions
 #------------------------------------------------------------------------------
-def connect_readonly(file) -> None:
+def connect_readonly(file: str) -> None:
     global _DB_CON
     abspath = os.path.abspath(file)
     connect_str = f'file:{abspath}?mode=ro'
     connection = sqlite3.connect(connect_str, uri=True)
     _DB_CON = connection
 
-def read_sql_query(query):
+def read_sql_query(query: str) -> pd.DataFrame:
     return pd.read_sql_query(query, _DB_CON)
 
-def close():
-    return _DB_CON.close()
+def close() -> None:
+    if _DB_CON is None:
+        return None
+    else:
+        return _DB_CON.close()
 
