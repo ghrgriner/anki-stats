@@ -28,7 +28,7 @@ _DB_CON = None
 #------------------------------------------------------------------------------
 # Functions
 #------------------------------------------------------------------------------
-def connect_readonly(file):
+def connect_readonly(file) -> None:
     global _DB_CON
     abspath = os.path.abspath(file)
     connect_str = f'file:{abspath}?mode=ro'

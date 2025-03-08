@@ -20,12 +20,14 @@
 
 import datetime
 import math
+import time
 #from typing import NewType
 
 import numpy as np
 import pandas as pd
 
 import db
+import timing
 from consts import (
     INPUT_MODE_TEXT, INPUT_MODE_SQLITE,
     CARD_TYPE_REV,
@@ -92,7 +94,6 @@ def create_cards(input_file, input_mode):
         for col_name in df.columns:
             rename_dict[col_name] = 'c_' + col_name
         df.rename(rename_dict, axis=1, inplace=True)
-
         df['col_RolloverHour'] = rollover_hour
 
     next_day_start = get_next_day_start(rollover_hour)
@@ -123,15 +124,25 @@ def create_cards(input_file, input_mode):
     df['ease_label'] = df.c_factor.map(make_ease_bin)
     df['scaled_difficulty'] = 100*(df.c_difficulty - 1) / 9
     df['diff_bin_label'] = df.scaled_difficulty.map(make_diff_bin)
+    if input_mode == INPUT_MODE_SQLITE:
+        timing_config = timing.TimingConfig()
+        days_elapsed = timing.sched_timing_today(
+            creation_secs=timing.TimestampSecs(timing_config.creation_stamp),
+            current_secs=timing.TimestampSecs(time.time()),
+            creation_utc_offset=timing_config.creation_offset,
+            current_utc_offset=timing_config.local_offset,
+            rollover_hour=timing_config.rollover_hour).days_elapsed
+        df['col_TodayDaysElapsed'] = days_elapsed
 
-    # TODO: implement logic for INPUT_MODE_SQLITE for due_days
+    df['due_days'] = np.where(df.due_in_unix_epoch,
+        ((df.which_due
+         - next_day_start).dt.total_seconds().map(get_days_round_to_zero)),
+        np.where(df.c_odid == 0,
+                 df.c_due - df.col_TodayDaysElapsed,
+                 df.c_odue - df.col_TodayDaysElapsed))
+
+    # TODO: implement logic for INPUT_MODE_SQLITE for retrievability
     if input_mode == INPUT_MODE_TEXT:
-        df['due_days'] = np.where(df.due_in_unix_epoch,
-            ((df.which_due
-             - next_day_start).dt.total_seconds().map(get_days_round_to_zero)),
-            np.where(df.c_odid == 0,
-                     df.c_due - df.col_TodayDaysElapsed,
-                     df.c_odue - df.col_TodayDaysElapsed))
         df['bin_retr'] = df.csd_fsrs_retrievability.map(
                 lambda x: np.nan if math.isnan(x) else (100*x // 5))
         df['bin_retr_label'] = df.bin_retr.map(bin_label_from_index)

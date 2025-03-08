@@ -9,4 +9,8 @@ __pycache__
 /input
 /output
 pylintrc
-usesql.*
+# copy of parameters.py
+psql.py
+# copy of parameters.py
+ptext.py
+test.py

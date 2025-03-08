@@ -90,17 +90,15 @@ def print_stats_tables(df_cards=None, df_reviews=None, df_r_and_c=None):
                 & (df_reviews.review_relative_days == 0)
                 & (df_reviews.lastivl >= 21)))
 
-    # TODO: due_days not yet calculated for INPUT_MODE_SQLITE
-    if INPUT_MODE == INPUT_MODE_TEXT:
-        freq(df_cards, 'due_days', percent=True,
-             title='Table 2: Future Due',
-             where=(   (df_cards.due_days >= 0)
-                     & (df_cards.due_days <= 30)
-                     & (df_cards.c_type != CARD_TYPE_NEW)
-                     & (df_cards.c_queue != QUEUE_TYPE_SUSPENDED)
-                     & ~( ( (df_cards.c_queue == QUEUE_TYPE_SIBLING_BURIED)
-                          | (df_cards.c_queue == QUEUE_TYPE_MANUALLY_BURIED))
-                         & (df_cards.due_days <= 0))))
+    freq(df_cards, 'due_days', percent=True,
+         title='Table 2: Future Due',
+         where=(   (df_cards.due_days >= 0)
+                 & (df_cards.due_days <= 30)
+                 & (df_cards.c_type != CARD_TYPE_NEW)
+                 & (df_cards.c_queue != QUEUE_TYPE_SUSPENDED)
+                 & ~( ( (df_cards.c_queue == QUEUE_TYPE_SIBLING_BURIED)
+                      | (df_cards.c_queue == QUEUE_TYPE_MANUALLY_BURIED))
+                     & (df_cards.due_days <= 0))))
 
     freq(df_reviews, 'review_date_adj',
          title='Table 3: Calendar (current year to date)',
