@@ -36,12 +36,11 @@ from consts import (
     REVLOG_SUBCAT1_LRN, REVLOG_SUBCAT1_YOUNG, REVLOG_SUBCAT1_MATURE,
     REVLOG_SUBCAT1_OTHER, REVLOG_SUBCAT1_LABELS,
     REVLOG_SUBCAT2_YOUNG, REVLOG_SUBCAT2_MATURE, REVLOG_SUBCAT2_LABELS,
-    SECS_IN_DAY,
     TYPE_AND_QUEUE_LABELS,
     )
 from other_functions import (bin_label_from_index, get_days_round_to_zero,
-    make_diff_bin, make_ease_bin, round_away, get_next_day_start,
-    strip_last5, get_json_val, to_int_or_nan)
+    make_diff_bin, make_ease_bin, round_away, strip_last5, get_json_val,
+    to_int_or_nan)
 
 #------------------------------------------------------------------------------
 # Parameters (for modification by user)
@@ -91,7 +90,7 @@ def create_cards(input_file: str, input_mode: int) -> pd.DataFrame:
         df.rename(rename_dict, axis=1, inplace=True)
         df['col_RolloverHour'] = rollover_hour
 
-    next_day_start = get_next_day_start(rollover_hour)
+    next_day_start = timing.get_next_day_start(rollover_hour)
 
     df['added_millis'] = df.c_id
     df.set_index(['c_id'], verify_integrity=True, inplace=True)
@@ -105,12 +104,12 @@ def create_cards(input_file: str, input_mode: int) -> pd.DataFrame:
             datetime.datetime.fromtimestamp)
     df['odue_date'] = df.c_odue.map(
             datetime.datetime.fromtimestamp)
-    df['which_due'] = np.where(df.c_odid != 0, df.odue_date, df.due_date)
+    df['which_due'] = np.where(df.c_odid != 0, df.c_odue, df.c_due)
     df['due_in_unix_epoch'] = df.which_due.map(
-        lambda x: x.timestamp() > 1000000000 if not pd.isnull(x) else False)
+        lambda x: x > 1000000000 if not pd.isnull(x) else False)
     df['added_days'] = ((
-        (df.added_millis / 1000).map(datetime.datetime.fromtimestamp)
-         - next_day_start).dt.total_seconds() / SECS_IN_DAY).map(math.ceil)
+        (df.added_millis / 1000) - next_day_start.val).map(
+            get_days_round_to_zero))
 
     if input_mode == INPUT_MODE_SQLITE:
         df['c_difficulty'] = df.c_data.map(lambda x: get_json_val(x, 'd'))
@@ -133,8 +132,7 @@ def create_cards(input_file: str, input_mode: int) -> pd.DataFrame:
         df['col_TodayDaysElapsed'] = days_elapsed
 
     df['due_days'] = np.where(df.due_in_unix_epoch,
-        ((df.which_due
-         - next_day_start).dt.total_seconds().map(get_days_round_to_zero)),
+        ((df.which_due - next_day_start.val).map(get_days_round_to_zero)),
         np.where(df.c_odid == 0,
                  df.c_due - df.col_TodayDaysElapsed,
                  df.c_odue - df.col_TodayDaysElapsed))
@@ -175,7 +173,7 @@ def create_reviews(input_mode: int, cards_df: Optional[pd.DataFrame]=None
                           suffixes=(None, '_y'))
 
     rollover_hour = get_rollover_from_cards(cards_df)
-    next_day_start = get_next_day_start(rollover_hour)
+    next_day_start = timing.get_next_day_start(rollover_hour)
     offset = timing.get_python_local_offset()
 
     # these next two are str from INPUT_MODE_TEXT and num otherwise
@@ -209,12 +207,12 @@ def create_reviews(input_mode: int, cards_df: Optional[pd.DataFrame]=None
     df['review_kind_subcat2_label'] = df.review_kind_subcat2.map(
           lambda x: REVLOG_SUBCAT2_LABELS[x])
     df['taken_hrs'] = df.taken / (60*60)
-    df['review_date_adj'] = (df.review_datetime
-                             - datetime.timedelta(hours = rollover_hour)
-                            ).dt.date
     df['review_relative_days'] = (
-              (df.review_datetime - next_day_start).dt.total_seconds().map(
-              get_days_round_to_zero))
+         (df.review_datetime.map(datetime.datetime.timestamp)
+          - next_day_start.val).map(get_days_round_to_zero))
+    df['review_date_adj'] = (pd.to_datetime(datetime.date.today()) +
+        df.review_relative_days.map(
+                lambda x: datetime.timedelta(days=x))).dt.date
     df['review_kind_label'] = df.review_kind.map(
                                       lambda x: REVLOG_LABELS[x])
     df['retention_pop'] = (

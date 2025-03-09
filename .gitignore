@@ -14,3 +14,5 @@ psql.py
 # copy of parameters.py
 ptext.py
 test.py
+protoc
+run_both.sh

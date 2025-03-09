@@ -22,7 +22,7 @@ from dataclasses import dataclass
 import datetime
 import math
 import time
-from typing import Optional, Union
+from typing import Optional, Union, Self
 
 import db
 import pandas as pd
@@ -34,22 +34,28 @@ from other_functions import get_days_round_to_zero
 # Classes
 #------------------------------------------------------------------------------
 class TimestampSecs:
+    """Class for a timestamp represented in seconds (UNIX epoch time)."""
     val: int
+
+    def __init__(self, val: Union[int,float]):
+        self.val = math.floor(val)
 
     def datetime(self, offset: int) -> datetime.datetime:
         """Return tz-aware datetime object with the given offset."""
         timezone = datetime.timezone(datetime.timedelta(hours=-offset/60))
         return datetime.datetime.fromtimestamp(self.val, tz=timezone)
 
-    def __init__(self, val: int):
-        self.val = val
+    def adding_secs(self, val_to_add: int) -> Self:
+        self.val += val_to_add
+        return self
 
 @dataclass
 class SchedTimingToday:
-    # omit next_day_at for now
     now: TimestampSecs
     days_elapsed: int
     #next_day_at: TimestampSecs
+    def __str__(self) -> str:
+        return f'SchedTimingToday({self.now=},{self.days_elapsed=})'
 
 @dataclass
 class TimingConfig:
@@ -137,6 +143,7 @@ def sched_timing_today_v2_legacy(crt: TimestampSecs,
     crt_at_rollover = rollover_datetime(crt.datetime(current_utc_offset),
                                         rollover).timestamp()
     days_elapsed = get_days_round_to_zero(now.val - crt_at_rollover)
+
     return SchedTimingToday(now=now, days_elapsed=days_elapsed)
 
 def sched_timing_today_v2_new(creation_secs: TimestampSecs,
@@ -153,6 +160,7 @@ def sched_timing_today_v2_new(creation_secs: TimestampSecs,
 
     days_elapsed = days_elapsed_(created_datetime, now_datetime,
 		    rollover_passed)
+
     return SchedTimingToday(now=current_secs, days_elapsed=days_elapsed)
 
 def sched_timing_today(creation_secs: TimestampSecs,
@@ -169,9 +177,9 @@ def sched_timing_today(creation_secs: TimestampSecs,
         return sched_timing_today_v2_new(creation_secs, current_secs,
                  creation_utc_offset, current_utc_offset, rollover_hour)
 
+# we have creation_stamp in TimingConfig and not as a separate parameter
 def timing_for_timestamp(now: TimestampSecs,
                          timing_config: TimingConfig,
-                         creation_stamp: TimestampSecs,
                         ) -> SchedTimingToday:
     if timing_config.sched_ver == 1:
         rollover_hour = None
@@ -183,7 +191,7 @@ def timing_for_timestamp(now: TimestampSecs,
     else:
         raise ValueError(
             f'{timing_config.sched_ver=}, only 1 or 2 supported')
-    return sched_timing_today(creation_stamp,
+    return sched_timing_today(TimestampSecs(timing_config.creation_stamp),
                               now,
                               timing_config.creation_offset,
                               timing_config.local_offset,
@@ -206,4 +214,19 @@ def get_python_local_offset() -> int:
 def get_hour_from_secs(x: Union[float,int], offset: int) -> int:
     """Return local hour from seconds in epoch time."""
     return math.floor(((float(x) - offset) / 3600) % 24)
+
+def get_next_day_start(rollover_hour: int) -> TimestampSecs:
+    """Return date/time of the next start day (i.e., today or tomorrow)."""
+    now_local = datetime.datetime.today()
+    midnight_local = now_local.replace(hour=0, minute=0, second=0,
+                                       microsecond=0)
+    if rollover_hour == 0:
+        rt_local = midnight_local + datetime.timedelta(days = 1)
+    elif now_local.hour < rollover_hour:
+        rt_local = (midnight_local
+                + datetime.timedelta(days = 0, hours = rollover_hour))
+    else:
+        rt_local = (midnight_local
+                + datetime.timedelta(days = 1, hours = rollover_hour))
+    return TimestampSecs(rt_local.timestamp())
 

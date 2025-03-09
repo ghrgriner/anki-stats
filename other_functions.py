@@ -18,12 +18,10 @@
 """Other functions.
 """
 
-import datetime
 import math
 import json
 
 import numpy as np
-import pandas as pd
 from typing import Union, Optional
 
 from consts import SECS_IN_DAY
@@ -80,7 +78,7 @@ def to_int_or_nan(val: Union[str, int, float, None]
         else:
             return np.nan
     elif val is None:
-            return np.nan
+        return np.nan
     else:
         return int(val)
 
@@ -166,18 +164,6 @@ def round_away(x: Union[int, float]) -> Union[int, float]:
         return math.floor(x)+1
     else:
         return np.round(x)
-
-def get_next_day_start(rollover_hour: int) -> pd.Timestamp:
-    """Return date/time of the next start day (i.e., today or tomorrow)."""
-    if rollover_hour == 0:
-        return (pd.Timestamp(datetime.date.today())
-                + datetime.timedelta(days = 1, hours = rollover_hour))
-    elif datetime.datetime.now().hour < rollover_hour:
-        return (pd.Timestamp(datetime.date.today())
-                + datetime.timedelta(days = 0, hours = rollover_hour))
-    else:
-        return (pd.Timestamp(datetime.date.today())
-                + datetime.timedelta(days = 1, hours = rollover_hour))
 
 def get_json_val(x: str, key: str) -> float:
     if not x:
