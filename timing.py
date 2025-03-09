@@ -27,7 +27,7 @@ from typing import Optional, Union, Self
 import db
 import pandas as pd
 
-from consts import OFFSET_SOURCE_DB, OFFSET_SOURCE_PYTHON
+from consts import OFFSET_SOURCE_DB, OFFSET_SOURCE_PYTHON, SECS_IN_DAY
 from other_functions import get_days_round_to_zero
 
 #------------------------------------------------------------------------------
@@ -53,7 +53,7 @@ class TimestampSecs:
 class SchedTimingToday:
     now: TimestampSecs
     days_elapsed: int
-    #next_day_at: TimestampSecs
+    next_day_at: TimestampSecs
     def __str__(self) -> str:
         return f'SchedTimingToday({self.now=},{self.days_elapsed=})'
 
@@ -134,7 +134,9 @@ def days_elapsed_(start_date: datetime.datetime,
 def sched_timing_today_v1(crt: TimestampSecs,
                           now: TimestampSecs) -> SchedTimingToday:
     days_elapsed = get_days_round_to_zero(now.val - crt.val)
-    return SchedTimingToday(now=now, days_elapsed=days_elapsed)
+    next_day_at = TimestampSecs(crt.val + (days_elapsed + 1)*SECS_IN_DAY)
+    return SchedTimingToday(now=now, days_elapsed=days_elapsed,
+                            next_day_at=next_day_at)
 
 def sched_timing_today_v2_legacy(crt: TimestampSecs,
                                  rollover: int,
@@ -144,7 +146,14 @@ def sched_timing_today_v2_legacy(crt: TimestampSecs,
                                         rollover).timestamp()
     days_elapsed = get_days_round_to_zero(now.val - crt_at_rollover)
 
-    return SchedTimingToday(now=now, days_elapsed=days_elapsed)
+    next_day_at = TimestampSecs(
+        rollover_datetime(now.datetime(current_utc_offset),
+                          rollover).timestamp())
+    if next_day_at.val < now.val:
+        next_day_at = next_day_at.adding_secs(SECS_IN_DAY)
+
+    return SchedTimingToday(now=now, days_elapsed=days_elapsed,
+                            next_day_at=next_day_at)
 
 def sched_timing_today_v2_new(creation_secs: TimestampSecs,
                               current_secs: TimestampSecs,
@@ -157,11 +166,17 @@ def sched_timing_today_v2_new(creation_secs: TimestampSecs,
     rollover_today_datetime = rollover_datetime(now_datetime,
                                                 rollover_hour)
     rollover_passed = rollover_today_datetime <= now_datetime
+    if rollover_passed:
+        next_day_at = TimestampSecs((rollover_today_datetime
+                              + datetime.timedelta(days=1)).timestamp())
+    else:
+        next_day_at = TimestampSecs(rollover_today_datetime.timestamp())
 
     days_elapsed = days_elapsed_(created_datetime, now_datetime,
 		    rollover_passed)
 
-    return SchedTimingToday(now=current_secs, days_elapsed=days_elapsed)
+    return SchedTimingToday(now=current_secs, days_elapsed=days_elapsed,
+                            next_day_at=next_day_at)
 
 def sched_timing_today(creation_secs: TimestampSecs,
                        current_secs: TimestampSecs,

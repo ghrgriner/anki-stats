@@ -28,7 +28,10 @@ from parameters import (
     CARDS_BROWSER_INPUT_FILE,
     )
 from consts import INPUT_MODE_SQLITE
-from prepare_data import create_cards, create_reviews
+from prepare_data import (
+    create_cards, create_reviews, add_time_of_last_review_to_cards,
+    add_fsrs_retrievability,
+                         )
 from custom_output import create_all_custom_figures
 from standard_output import print_stats_tables
 
@@ -60,6 +63,11 @@ def main() -> None:
     # SQLite database.
     #--------------------------------------------------------------------------
     df_reviews = create_reviews(INPUT_MODE, df_cards_m)
+
+    if INPUT_MODE == INPUT_MODE_SQLITE:
+        df_cards_m = add_time_of_last_review_to_cards(df_cards_m, df_reviews)
+        df_cards_m = add_fsrs_retrievability(df_cards_m)
+
     if INPUT_MODE == INPUT_MODE_SQLITE: db.close()
 
     #--------------------------------------------------------------------------

@@ -21,7 +21,7 @@
 import datetime
 import math
 import time
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -227,3 +227,53 @@ def create_reviews(input_mode: int, cards_df: Optional[pd.DataFrame]=None
 
     return df
 
+def add_time_of_last_review_to_cards(df_cards: pd.DataFrame,
+                                     df_reviews: pd.DataFrame
+                                    ) -> pd.DataFrame:
+    """Add `time_of_last_review` variable to cards data frame.
+
+    SELECT id / 1000 FROM revlog
+    WHERE cid = $1 AND ease BETWEEN 1 AND 4
+                   AND ( type != 3 OR factor != 0)
+    ORDER BY id DESC LIMIT 1
+    """
+
+    subset_df = df_reviews[  (df_reviews.ease >= 1)
+                           & (df_reviews.ease <= 4)
+                           & (  (df_reviews.review_kind != REVLOG_FILT)
+                              | (df_reviews.factor != 0))]
+    maxidx = subset_df.groupby(['c_id'])['date_millis'].transform(max) == (
+                                                 subset_df.date_millis)
+    max_df = subset_df[maxidx][['c_id','date_millis']]
+    max_df['time_of_last_review'] = max_df.date_millis.map(
+        lambda x: timing.TimestampSecs(x / 1000))
+    df_cards = df_cards.merge(max_df[['c_id','time_of_last_review']],
+                              how='left', left_index=True, right_on=['c_id'])
+    df_cards.set_index(['c_id'], verify_integrity=True, inplace=True)
+    print(df_cards)
+    return df_cards
+
+def current_retrievability(stability: float, days_elapsed: int) -> float:
+    return math.pow(days_elapsed / stability * (19 / 85) + 1,
+                    -0.5)
+
+def add_fsrs_retrievability(df_cards: pd.DataFrame) -> pd.DataFrame:
+    timing_config = timing.TimingConfig()
+
+    def get_days_elapsed(now: Union[float, timing.TimestampSecs]
+                        ) -> Union[int, float]:
+        if isinstance(now, timing.TimestampSecs):
+            return timing.timing_for_timestamp(now, timing_config).days_elapsed
+        elif math.isnan(now):
+            return np.nan
+        else:
+            raise ValueError('now must be an instance of '
+                f'timing.TimestampSecs or satisfy math.isnan, not {now=}')
+
+    df_cards['days_elapsed_last_review'] = df_cards.time_of_last_review.map(
+        get_days_elapsed)
+
+    df_cards['fsrs_retrievability'] = [ current_retrievability(row[0], row[1])
+       for row in df_cards[['c_stability','days_elapsed_last_review']].values
+                                      ]
+    return df_cards
