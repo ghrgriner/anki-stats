@@ -21,7 +21,7 @@
 import datetime
 import math
 import time
-from typing import Optional, Union
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -31,16 +31,18 @@ import timing
 from consts import (
     INPUT_MODE_TEXT, INPUT_MODE_SQLITE,
     CARD_TYPE_REV,
+    QUEUE_TYPE_LRN, QUEUE_TYPE_DAY_LEARN_RELEARN, QUEUE_TYPE_REV,
     REVLOG_LRN, REVLOG_REV, REVLOG_RELRN, REVLOG_FILT,
     REVLOG_LABELS,
     REVLOG_SUBCAT1_LRN, REVLOG_SUBCAT1_YOUNG, REVLOG_SUBCAT1_MATURE,
     REVLOG_SUBCAT1_OTHER, REVLOG_SUBCAT1_LABELS,
     REVLOG_SUBCAT2_YOUNG, REVLOG_SUBCAT2_MATURE, REVLOG_SUBCAT2_LABELS,
+    SECS_IN_DAY,
     TYPE_AND_QUEUE_LABELS,
     )
 from other_functions import (bin_label_from_index, get_days_round_to_zero,
     make_diff_bin, make_ease_bin, round_away, strip_last5, get_json_val,
-    to_int_or_nan)
+    to_int_or_nan, get_days_round_to_zero_w_nan)
 
 #------------------------------------------------------------------------------
 # Parameters (for modification by user)
@@ -137,7 +139,6 @@ def create_cards(input_file: str, input_mode: int) -> pd.DataFrame:
                  df.c_due - df.col_TodayDaysElapsed,
                  df.c_odue - df.col_TodayDaysElapsed))
 
-    # TODO: implement logic for INPUT_MODE_SQLITE for retrievability
     if input_mode == INPUT_MODE_TEXT:
         df['bin_retr'] = df.csd_fsrs_retrievability.map(
                 lambda x: np.nan if math.isnan(x) else (100*x // 5))
@@ -227,6 +228,11 @@ def create_reviews(input_mode: int, cards_df: Optional[pd.DataFrame]=None
 
     return df
 
+# not used when making standard tables, but might be useful going forward.
+# The days_elapsed is calculated slightly differently when calculating
+# FSRS retrievability in the `card_stats_data()` function (in Anki) than
+# when passing it to the browser or making the figure in the `Stats`
+# window. This is an (untested) implementation the logic for `card_stats_data`.
 def add_time_of_last_review_to_cards(df_cards: pd.DataFrame,
                                      df_reviews: pd.DataFrame
                                     ) -> pd.DataFrame:
@@ -242,7 +248,7 @@ def add_time_of_last_review_to_cards(df_cards: pd.DataFrame,
                            & (df_reviews.ease <= 4)
                            & (  (df_reviews.review_kind != REVLOG_FILT)
                               | (df_reviews.factor != 0))]
-    maxidx = subset_df.groupby(['c_id'])['date_millis'].transform(max) == (
+    maxidx = subset_df.groupby(['c_id'])['date_millis'].transform('max') == (
                                                  subset_df.date_millis)
     max_df = subset_df[maxidx][['c_id','date_millis']]
     max_df['time_of_last_review'] = max_df.date_millis.map(
@@ -250,30 +256,47 @@ def add_time_of_last_review_to_cards(df_cards: pd.DataFrame,
     df_cards = df_cards.merge(max_df[['c_id','time_of_last_review']],
                               how='left', left_index=True, right_on=['c_id'])
     df_cards.set_index(['c_id'], verify_integrity=True, inplace=True)
-    print(df_cards)
+    #print(df_cards)
     return df_cards
 
-def current_retrievability(stability: float, days_elapsed: int) -> float:
-    return math.pow(days_elapsed / stability * (19 / 85) + 1,
-                    -0.5)
+def add_fsrs_retrievability(df: pd.DataFrame) -> pd.DataFrame:
+    # multiple calls to time.time() in the code that follows, but
+    # it doesn't make sense to actually advance the timer.
+    timing_ = timing.timing_for_timestamp(timing.TimestampSecs(time.time()),
+                                          timing.TimingConfig())
+    df['is_due_in_days'] =(
+             (  (df.c_queue == QUEUE_TYPE_DAY_LEARN_RELEARN)
+              | (df.c_queue == QUEUE_TYPE_REV))
+           | (  (df.c_type == CARD_TYPE_REV)
+              & (df.c_queue < 0))
+                          )
+    df['due_time'] = (
+        np.where(df.c_queue == QUEUE_TYPE_LRN,
+             df.which_due,
+             np.where(df.is_due_in_days,
+                      (timing_.now.val
+                       + (df.which_due - timing_.days_elapsed) * SECS_IN_DAY),
+                      np.nan))
+                     )
+    # Anki Rust code has a bug where the 'true' branch of the below should be
+    # max(timing_.next_day_at - df.which_due, 0) / SECS_IN_DAY, but in their
+    # code, timing_.next_day_at is just initialized to 0. For now, we match
+    # Anki.
+    df['days_since_last_review'] = (
+        np.where(~df.is_due_in_days,
+                 0, # TODO: bug (see above), but will match Anki for now
+                 (timing_.now.val
+                    - (df.due_time - SECS_IN_DAY * df.c_ivl)).map(
+                             get_days_round_to_zero_w_nan)
+                )                  )
 
-def add_fsrs_retrievability(df_cards: pd.DataFrame) -> pd.DataFrame:
-    timing_config = timing.TimingConfig()
+    df['fsrs_base'] = (df.days_since_last_review / df.c_stability
+                             * (19.0 / 85) + 1)
+    df['fsrs_retrievability'] = df.fsrs_base.map(lambda x: math.pow(x, -0.5))
 
-    def get_days_elapsed(now: Union[float, timing.TimestampSecs]
-                        ) -> Union[int, float]:
-        if isinstance(now, timing.TimestampSecs):
-            return timing.timing_for_timestamp(now, timing_config).days_elapsed
-        elif math.isnan(now):
-            return np.nan
-        else:
-            raise ValueError('now must be an instance of '
-                f'timing.TimestampSecs or satisfy math.isnan, not {now=}')
+    df['bin_retr'] = df.fsrs_retrievability.map(
+                lambda x: np.nan if math.isnan(x) else (100*x // 5))
+    df['bin_retr_label'] = df.bin_retr.map(bin_label_from_index)
 
-    df_cards['days_elapsed_last_review'] = df_cards.time_of_last_review.map(
-        get_days_elapsed)
+    return df
 
-    df_cards['fsrs_retrievability'] = [ current_retrievability(row[0], row[1])
-       for row in df_cards[['c_stability','days_elapsed_last_review']].values
-                                      ]
-    return df_cards

@@ -103,6 +103,7 @@ def main() -> None:
     # window. As an example, here we repeat Figure 4 stratified by card type.
     #--------------------------------------------------------------------------
     create_all_custom_figures(df_cards)
+    #custom_listings(df_cards)
 
 #------------------------------------------------------------------------------
 # End Functions

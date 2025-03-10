@@ -62,6 +62,10 @@ def bin_label_from_index(val: float) -> str:
         return ''
     if val == 19 or val == 20:
         return '[95%, 100%]'
+    elif val == 0:
+        return '[ 0%,  5%]'
+    elif val == 1:
+        return '[ 5%, 10%]'
     else:
         return f'[{int(val*5)}%, {int(val+1)*5}%)'
 
@@ -130,6 +134,16 @@ def get_days_round_to_zero(x: Union[int, float]) -> int:
     else:
         return int(x // SECS_IN_DAY)
 
+def get_days_round_to_zero_w_nan(x: Union[int, float]
+                                ) -> Union[int, float]:
+    """Convert seconds to days, rounding towards zero."""
+    if math.isnan(x):
+        return np.nan
+    elif x < 0:
+        return int(-1 * (-x // SECS_IN_DAY))
+    else:
+        return int(x // SECS_IN_DAY)
+
 def make_diff_bin(x: Optional[Union[int, float]]) -> str:
     if not x:
         return ''
@@ -139,9 +153,14 @@ def make_diff_bin(x: Optional[Union[int, float]]) -> str:
         bin_num = math.floor(x / 5)
         if bin_num in [19, 20]:
             return '[95%, 100%]'
+        elif bin_num == 0:
+            return '[ 0%,  5%]'
+        elif bin_num == 1:
+            return '[ 5%, 10%]'
         else:
             return f'[{5*(bin_num)}%, {5*(bin_num+1)}%)'
 
+# TODO: fix bin ordering
 def make_ease_bin(x: Union[int, float]) -> str:
     if not x:
         return ''

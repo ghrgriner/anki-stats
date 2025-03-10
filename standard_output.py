@@ -23,9 +23,7 @@ from typing import Optional
 
 import pandas as pd
 
-from parameters import INPUT_MODE
 from consts import (
-    INPUT_MODE_TEXT,
     QUEUE_TYPE_MANUALLY_BURIED, QUEUE_TYPE_SIBLING_BURIED,
     QUEUE_TYPE_SUSPENDED,
     CARD_TYPE_NEW, CARD_TYPE_REV, CARD_TYPE_RELEARNING,
@@ -163,10 +161,9 @@ def print_stats_tables(df_cards=None, df_reviews=None, df_r_and_c=None
     # When INPUT_MODE_TEXT, this might not match the `Stats` window exactly.
     # See Limitations section of the repository README.
     # TODO: retrievability not yet calculated for INPUT_MODE_SQLITE
-    if INPUT_MODE == INPUT_MODE_TEXT:
-        freq(df_cards, 'bin_retr_label',
-            title='Table 10: Card Retrievability (FSRS desks only)',
-            where=~pd.isnull(df_cards.scaled_difficulty))
+    freq(df_cards, ['bin_retr_label'],
+        title='Table 10: Card Retrievability (FSRS desks only)',
+        where=~pd.isnull(df_cards.scaled_difficulty))
 
     freq(df_r_and_c, ['review_hr'],
          title='Table 11: Hourly Breakdown (counts)',

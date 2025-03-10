@@ -51,3 +51,17 @@ def create_all_custom_figures(df_cards: pd.DataFrame) -> None:
     #df.hist(column = 'c_ivl')
     #plt.hist(df.due_days, bins=np.linspace(0, 30, 31), rwidth=.90)
 
+# Debugging
+#def custom_listings(df_cards: pd.DataFrame) -> None:
+#    df = pd.read_csv('input/cards.csv', sep='\t', quotechar='"',
+#                        index_col=False,
+#                        dtype={'c_nid': str, 'revlog_entries':str,
+#                               'col_TodayDaysElapsed': int, 'c_due': np.int32,
+#                                'c_difficulty': float, 'c_stability': float,
+#                                'c_id': int, 'csd_fsrs_retrievability':float})
+#    df.set_index(['c_id'], verify_integrity=True, inplace=True)
+#
+#    df_cards['csd_fsrs_retrievability'] = df.csd_fsrs_retrievability
+#    freq(df_cards, ['days_since_last_review'])
+#    print(df_cards[['days_since_last_review',
+#                     'csd_fsrs_retrievability','fsrs_retrievability']])
