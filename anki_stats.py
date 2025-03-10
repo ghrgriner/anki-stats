@@ -65,7 +65,6 @@ def main() -> None:
     df_reviews = create_reviews(INPUT_MODE, df_cards_m)
 
     if INPUT_MODE == INPUT_MODE_SQLITE:
-        df_cards_m = add_time_of_last_review_to_cards(df_cards_m, df_reviews)
         df_cards_m = add_fsrs_retrievability(df_cards_m)
 
     if INPUT_MODE == INPUT_MODE_SQLITE: db.close()
@@ -102,7 +101,7 @@ def main() -> None:
     # 4. Create custom figure(s) that are not available in the Anki `Stats`
     # window. As an example, here we repeat Figure 4 stratified by card type.
     #--------------------------------------------------------------------------
-    create_all_custom_figures(df_cards)
+    create_all_custom_figures(df_cards, INPUT_MODE)
     #custom_listings(df_cards)
 
 #------------------------------------------------------------------------------
