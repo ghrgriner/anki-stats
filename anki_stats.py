@@ -29,8 +29,7 @@ from parameters import (
     )
 from consts import INPUT_MODE_SQLITE
 from prepare_data import (
-    create_cards, create_reviews, add_time_of_last_review_to_cards,
-    add_fsrs_retrievability,
+    create_cards, create_reviews, add_fsrs_retrievability,
                          )
 from custom_output import create_all_custom_figures
 from standard_output import print_stats_tables

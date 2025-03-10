@@ -28,6 +28,8 @@ import pandas as pd
 
 import db
 import timing
+from fsrs import fsrs
+
 from consts import (
     INPUT_MODE_TEXT, INPUT_MODE_SQLITE,
     CARD_TYPE_REV,
@@ -290,9 +292,7 @@ def add_fsrs_retrievability(df: pd.DataFrame) -> pd.DataFrame:
                              get_days_round_to_zero_w_nan)
                 )                  )
 
-    df['fsrs_base'] = (df.days_since_last_review / df.c_stability
-                             * (19.0 / 85) + 1)
-    df['fsrs_retrievability'] = df.fsrs_base.map(lambda x: math.pow(x, -0.5))
+    df = fsrs.add_current_retrievability(df)
 
     df['bin_retr'] = df.fsrs_retrievability.map(
                 lambda x: np.nan if math.isnan(x) else (100*x // 5))
