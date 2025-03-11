@@ -25,7 +25,6 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
-from other_functions import freq
 
 import db
 import timing

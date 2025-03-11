@@ -98,7 +98,7 @@ def main() -> None:
     # 4. Create custom figure(s) that are not available in the Anki `Stats`
     # window. As an example, here we repeat Figure 4 stratified by card type.
     #--------------------------------------------------------------------------
-    create_all_custom_figures(df_cards, INPUT_MODE)
+    create_all_custom_figures(df_cards)
     #custom_listings(df_cards)
 
 #------------------------------------------------------------------------------

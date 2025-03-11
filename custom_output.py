@@ -21,7 +21,6 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from consts import INPUT_MODE_TEXT
 
 #------------------------------------------------------------------------------
 # Functions
@@ -38,11 +37,10 @@ def stacked_bar(df: pd.DataFrame, var, group, outfile) -> None:
     plt.legend()
     plt.savefig(outfile)
 
-def create_all_custom_figures(df_cards: pd.DataFrame, input_mode) -> None:
-    if input_mode == INPUT_MODE_TEXT:
-        df = df_cards[ df_cards.c_type != 0 ]
-        stacked_bar(df, var='due_days', group='c_CardType',
-                    outfile='output/hist_due_num.png')
+def create_all_custom_figures(df_cards: pd.DataFrame) -> None:
+    df = df_cards[ df_cards.c_type != 0 ]
+    stacked_bar(df, var='due_days', group='c_CardType',
+                outfile='output/hist_due_num.png')
 
     #etc...
     #df.hist(column = 'c_ivl')
