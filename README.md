@@ -1,7 +1,7 @@
 # Introduction
 
 Anki is open-source flashcard software written in Python, Qt, Rust,
-Svelte, and other languages. The flashcards are organized into decks,
+Svelte, and other languages. Flashcards are organized into decks,
 and Anki provides a
 [statistics window](https://docs.ankiweb.net/stats.html#statistics)
 where users can obtain information on their studying performance for a deck.
@@ -39,7 +39,9 @@ not full-blown computer scientists. It would benefit these users
 to have a Python implementation for manual analysis as well as
 improved documentation of behavior in the Rust backend.
 
-For these reasons, the purpose of this repository and documentation is to:
+## Objectives
+
+Given the above, the purpose of this repository and documentation is to:
 
 1. Describe the statistics included in the Anki statistics window
 in greater detail than that provided by the application (e.g., to describe
