@@ -25,6 +25,7 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
+from other_functions import freq
 
 import db
 import timing
@@ -93,6 +94,17 @@ def create_cards(input_file: str, input_mode: int) -> pd.DataFrame:
             rename_dict[col_name] = 'c_' + col_name
         df.rename(rename_dict, axis=1, inplace=True)
         df['col_RolloverHour'] = rollover_hour
+
+        # Get Note Type and Card Type
+        notes = db.read_sql_query('select id, mid AS ntid from notes')
+        df = df.merge(notes, how='left', left_on=['c_nid'], right_on='id')
+        notetypes = db.read_sql_query('select id AS ntid, name AS c_NoteType'
+                                      ' from notetypes')
+        df = df.merge(notetypes, how='left', left_on='ntid', right_on='ntid')
+        templates = db.read_sql_query('select ntid, ord, name AS c_CardType'
+                                      ' from templates')
+        df = df.merge(templates, how='left', left_on=['ntid','c_ord'],
+                      right_on=['ntid','ord'])
 
     next_day_start = timing.get_next_day_start(rollover_hour)
 
