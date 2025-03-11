@@ -65,7 +65,8 @@ and run the
 update the parameters in `parameters.py` with the path(s) to the downloaded
 file(s), and then run `anki_stats.py` to create analysis datasets at the
 card and review level from which they can immediately make custom
-tables and figures.
+tables and figures. The export step can be omitted if the user elects
+to configure the input parameters to [access the Anki database directly](https://github.com/ghrgriner/anki-stats/wiki/Alternate-Data-Access-Methods).
 
 # Motivation
 
