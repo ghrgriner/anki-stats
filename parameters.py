@@ -31,7 +31,9 @@ INPUT_FILE = 'input/cards.csv'
 # but nevertheless, you should not attempt to write to the Anki database as
 # this can easily corrupt the collection. Therefore, only use INPUT_MODE_SQLITE
 # if you have reviewed the code in this package and are satisfied with the
-# database operations being performed.
+# database operations being performed. Alternatively, make a copy of your
+# `collection.anki2` for use with this package and specify the path to the
+# copy.
 INPUT_MODE = INPUT_MODE_TEXT
 
 # Only used when INPUT_MODE == INPUT_MODE_SQLITE to filter the cards (if
