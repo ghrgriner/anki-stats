@@ -29,7 +29,7 @@ data can be extracted.
 
 Anki has [an add-on interface](https://addon-docs.ankiweb.net) where users
 can write Python modules that interact with the software.
-There are [existing add-ons](#Existing-Add-Ons-That-Create-Custom-Figures)
+There are [existing add-ons](https://github/ghrgriner/anki-stats/wiki/Existing-Add-Ons-That-Create-Custom-Figures)
 that add custom figures to the new (or legacy [see previous link]) statistics
 window. However, for one-time or infrequent analyses, we believe it is not
 worth the effort of integrating the analysis into Anki. Python is a
@@ -130,38 +130,6 @@ The Retrievability table generated this package differs
 slightly from the counts in the figure in the statistics window
 for `INPUT_MODE_TEXT`. See [the wiki](https://github.com/ghrgriner/anki-stats/wiki/FSRS-Retrievability)
 for details.
-
-# Existing Add-Ons That Create Custom Figures
-
-We have also not previously discussed the fact that there are
-actually *two* statistics windows available in Anki: (1) the
-(new) window accessible by pushing the `Stats` button, and
-(2) the legacy window accessible by pushing `SHIFT + Stats`.
-The default graphs in the legacy window offer fewer
-figures and less filtering and interaction capabilities than
-the new window. Figures in the legacy window are created by
-creating strings that contain HTML and Javascript in Python
-rather than using Rust and Svelte.
-
-We do not recommend developing figures for the legacy interface,
-but we mention its existence so that readers will understand what
-these terms refer to if [searching for add-ons on AnkiWeb](https://ankiweb.net/shared/addons).
-
-That being said, below are two example add-ons that add
-custom figures to the new statistics window and the legacy
-statistics window.
-
-**Disclaimer**: We did not author these add-ons and we have not
-inspected their code. As AnkiWeb states: "As add-ons are programs
-downloaded from the internet, they are potentially malicious. You
-should only download add-ons you trust."
-
-1. [Search Stats Extended](https://ankiweb.net/shared/info/1613056169):
-   This add-on adds 20 graphs to the (non-legacy) statistics window.
-   This is the only add-on we are aware of that manipulates the new
-   statistics window.
-2. [Progress Graphs and Stats for Learned and Matured Cards](https://ankiweb.net/shared/info/266436365): This adds two graphs to the legacy statistics
-   window.
 
 # Anki Version
 
