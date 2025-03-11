@@ -75,8 +75,7 @@ def main() -> None:
     #--------------------------------------------------------------------------
     if CARDS_BROWSER_INPUT_FILE is not None:
         df_cards_b = pd.read_csv(CARDS_BROWSER_INPUT_FILE, sep='\t',
-                                 quoting=csv.QUOTE_NONE, skiprows=(1),
-                                 index_col=False,
+                                 quoting=csv.QUOTE_NONE, index_col=False,
                                  dtype={'Difficulty': str, 'Ease': str})
         df_cards_b.set_index(['cid'], verify_integrity=True, inplace=True)
 
