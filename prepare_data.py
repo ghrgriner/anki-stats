@@ -300,3 +300,20 @@ def add_fsrs_retrievability(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+def add_deck_names_and_filter(df_cards: pd.DataFrame,
+                              deck_name: Optional[str]) -> pd.DataFrame:
+    df_decks = db.read_sql_query('select id, name from decks')
+    df_decks.set_index(['id'], verify_integrity=True, inplace=True)
+    df_decks['name_with_colons'] = df_decks.name.str.replace('\x1f','::')
+    deck_dict = df_decks.to_dict(orient='index')
+    df_cards['c_Deck'] = df_cards.c_did.map(
+        lambda x: deck_dict[x]['name_with_colons'])
+    df_cards['original_deck_name'] = df_cards.c_odid.map(
+        lambda x: deck_dict[x]['name_with_colons'] if x else '')
+
+    select_deck_df = df_decks.loc[
+          (df_decks.name_with_colons.str.match(f'{deck_name}(::)?'))]
+    df_cards = df_cards[((df_cards.c_did).isin(select_deck_df.index.values)
+            | (df_cards.c_odid).isin(select_deck_df.index.values))]
+
+    return df_cards

@@ -30,6 +30,7 @@ from parameters import (
 from consts import INPUT_MODE_SQLITE
 from prepare_data import (
     create_cards, create_reviews, add_fsrs_retrievability,
+    add_deck_names_and_filter,
                          )
 from custom_output import create_all_custom_figures
 from standard_output import print_stats_tables
@@ -52,10 +53,7 @@ def main() -> None:
     # 1b. Filter by deck name, if requested (INPUT_MODE_SQLITE only)
     #--------------------------------------------------------------------------
     if DECK_NAME is not None and INPUT_MODE == INPUT_MODE_SQLITE:
-        df_decks = db.read_sql_query('select * from decks')
-        deck_id = df_decks.loc[df_decks.name == DECK_NAME, 'id'].values[0]
-        df_cards_m = df_cards_m[  (df_cards_m.c_did == deck_id)
-                                | (df_cards_m.c_odid == deck_id) ]
+        df_cards_m = add_deck_names_and_filter(df_cards_m, DECK_NAME)
 
     #--------------------------------------------------------------------------
     # 1c. Get reviews either from df_cards_m.revlog_entries or by querying the

@@ -35,7 +35,9 @@ INPUT_FILE = 'input/cards.csv'
 INPUT_MODE = INPUT_MODE_TEXT
 
 # Only used when INPUT_MODE == INPUT_MODE_SQLITE to filter the cards (if
-# desired), since all cards in the collection are retrieved from database
+# desired), since all cards in the collection are retrieved from database.
+# Decks will be selected if the deck name matches exactly or matches as a
+# prefix before '::'.
 DECK_NAME = None
 
 # Path to optional input file if user wants to use additional fields export
