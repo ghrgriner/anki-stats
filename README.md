@@ -29,7 +29,7 @@ data can be extracted.
 
 Anki has [an add-on interface](https://addon-docs.ankiweb.net) where users
 can write Python modules that interact with the software.
-There are [existing add-ons](https://github/ghrgriner/anki-stats/wiki/Existing-Add-Ons-That-Create-Custom-Figures)
+There are [existing add-ons](https://github.com/ghrgriner/anki-stats/wiki/Existing-Add-Ons-That-Create-Custom-Figures)
 that add custom figures to the new (or legacy [see previous link]) statistics
 window. However, for one-time or infrequent analyses, we believe it is not
 worth the effort of integrating the analysis into Anki. Python is a
