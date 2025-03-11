@@ -134,14 +134,6 @@ and discussion of a small bug in the Anki calculation (and
 replicated here to attempt to match Anki) is discussed in
 [this post](https://forums.ankiweb.net/t/bug-retrievability-in-browser-doesnt-match-retrievability-in-stats-histogram) on Anki Forums.
 
-Likewise, for `INPUT_MODE_SQLITE`, the tabular retrievability output may
-differ from the figure in the statistics window because
-for some cards, the days elapsed is calculated based on
-(rounded) differences in timestamps. In other words, the
-'days elapsed' integer value that is input to the retrievability
-calculation can change throughout the day and not just at
-the rollover hour.
-
 # Existing Add-Ons That Create Custom Figures
 
 We have also not previously discussed the fact that there are
