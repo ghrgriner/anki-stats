@@ -21,6 +21,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from other_functions import freq
 
 #------------------------------------------------------------------------------
 # Functions
@@ -41,6 +42,20 @@ def create_all_custom_figures(df_cards: pd.DataFrame) -> None:
     df = df_cards[ df_cards.c_type != 0 ]
     stacked_bar(df, var='due_days', group='c_CardType',
                 outfile='output/hist_due_num.png')
+
+    # Here, we show how to merge notes that are exported by the companion
+    # exporter. We have renamed the output notes file (default name is:
+    # [NoteType]___[NoteTypeId].csv) to notes.csv. 'nid' will always be
+    # present, as this is from the Anki database. The field `n_exprs` is
+    # the field in our notes that we want to merge. Multiple merges may
+    # be required if the cards data frame contains more than one type of
+    # note.
+
+    #df_notes = pd.read_csv('input/notes.csv', sep='\t', quotechar='"',
+    #                 index_col=False)
+    #df_cards = df_cards.merge(df_notes[['nid','n_exprs']], how='left',
+    #              left_on='c_nid', right_on='nid')
+    #freq(df_cards, 'n_exprs', title='Number of expressions', dropna=False)
 
     #etc...
     #df.hist(column = 'c_ivl')

@@ -77,7 +77,7 @@ def create_cards(input_file: str, input_mode: int) -> pd.DataFrame:
     if input_mode == INPUT_MODE_TEXT:
         df = pd.read_csv(input_file, sep='\t', quotechar='"',
                          index_col=False,
-                         dtype={'c_nid': str, 'revlog_entries':str,
+                         dtype={'revlog_entries':str,
                                 'col_TodayDaysElapsed': int, 'c_due': np.int32,
                                 'c_difficulty': float, 'c_stability': float,
                                 'c_id': int, 'csd_fsrs_retrievability':float})
