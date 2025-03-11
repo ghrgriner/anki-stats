@@ -54,6 +54,9 @@ def main() -> None:
     #--------------------------------------------------------------------------
     if DECK_NAME is not None and INPUT_MODE == INPUT_MODE_SQLITE:
         df_cards_m = add_deck_names_and_filter(df_cards_m, DECK_NAME)
+        if len(df_cards_m) == 0:
+            print("No cards selected")
+            return
 
     #--------------------------------------------------------------------------
     # 1c. Get reviews either from df_cards_m.revlog_entries or by querying the

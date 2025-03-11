@@ -158,9 +158,6 @@ def print_stats_tables(df_cards=None, df_reviews=None, df_r_and_c=None
          where=~pd.isnull(df_cards.scaled_difficulty))
          #where=(df_cards.diff_bin_label != ''))
 
-    # When INPUT_MODE_TEXT, this might not match the `Stats` window exactly.
-    # See Limitations section of the repository README.
-    # TODO: retrievability not yet calculated for INPUT_MODE_SQLITE
     freq(df_cards, ['bin_retr_label'],
         title='Table 10: Card Retrievability (FSRS desks only)',
         where=~pd.isnull(df_cards.scaled_difficulty))

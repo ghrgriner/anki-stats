@@ -297,10 +297,9 @@ def add_fsrs_retrievability(df: pd.DataFrame) -> pd.DataFrame:
     # Anki.
     df['days_since_last_review'] = (
         np.where(~df.is_due_in_days,
-                 0, # TODO: bug (see above), but will match Anki for now
-                 (timing_.now.val
-                    - (df.due_time - SECS_IN_DAY * df.c_ivl)).map(
-                             get_days_round_to_zero_w_nan)
+                0, # TODO: bug (maybe? see above), but will match Anki for now
+                (timing_.now.val - (df.due_time - SECS_IN_DAY * df.c_ivl)).map(
+                                lambda x: max(x, 0) // SECS_IN_DAY)
                 )                  )
 
     df = fsrs.add_current_retrievability(df)
