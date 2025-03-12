@@ -45,7 +45,7 @@ def print_retention_row(df: pd.DataFrame, desc: Optional[str],
     else:
         df_ = df
 
-    def get_pct(subset=None) -> str:
+    def calculate_pct(subset=None) -> str:
         if subset is not None:
             df3_ = df_[subset]
         else:
@@ -61,9 +61,9 @@ def print_retention_row(df: pd.DataFrame, desc: Optional[str],
                 return '  0   '
             return f'{pct:6.1f}%'
 
-    total_pct = get_pct()
-    young_pct = get_pct(df_.lastivl < 21)
-    mature_pct = get_pct(~(df_.lastivl < 21))
+    total_pct = calculate_pct()
+    young_pct = calculate_pct(df_.lastivl < 21)
+    mature_pct = calculate_pct(~(df_.lastivl < 21))
     print(f'{desc:<11}{young_pct:>10}{mature_pct:>10}{total_pct:>10}'
           f'{len(df_):>10}')
 

@@ -42,9 +42,9 @@ from consts import (
     SECS_IN_DAY,
     TYPE_AND_QUEUE_LABELS,
     )
-from other_functions import (bin_label_from_index, get_days_round_to_zero,
-    make_diff_bin, make_ease_bin, round_away, strip_last5, get_json_val,
-    to_int_or_nan, get_days_round_to_zero_w_nan)
+from other_functions import (bin_label_from_index, secs_to_days_round_to_zero,
+    make_diff_bin, make_ease_bin, round_away, strip_last5, json_val_or_nan,
+    to_int_or_nan)
 
 #------------------------------------------------------------------------------
 # Parameters (for modification by user)
@@ -58,7 +58,7 @@ pd.set_option('display.max_rows',500)
 #------------------------------------------------------------------------------
 # Functions
 #------------------------------------------------------------------------------
-def get_rollover_from_cards(df: pd.DataFrame) -> int:
+def _rollover_from_cards(df: pd.DataFrame) -> int:
     """Get rollover hour from first row and 'col_RolloverHour' col of df.
     """
     return int(df.iloc[0, df.columns.get_loc('col_RolloverHour')])
@@ -81,7 +81,7 @@ def create_cards(input_file: str, input_mode: int) -> pd.DataFrame:
                                 'col_TodayDaysElapsed': int, 'c_due': np.int32,
                                 'c_difficulty': float, 'c_stability': float,
                                 'c_id': int, 'csd_fsrs_retrievability':float})
-        rollover_hour = get_rollover_from_cards(df)
+        rollover_hour = _rollover_from_cards(df)
     else:
         df = db.read_sql_query('select * from cards')
         df_config = db.read_sql_query('select * from config')
@@ -105,7 +105,7 @@ def create_cards(input_file: str, input_mode: int) -> pd.DataFrame:
         df = df.merge(templates, how='left', left_on=['ntid','c_ord'],
                       right_on=['ntid','ord'])
 
-    next_day_start = timing.get_next_day_start(rollover_hour)
+    next_day_start = timing.next_day_start(rollover_hour)
 
     df['added_millis'] = df.c_id
     df.set_index(['c_id'], verify_integrity=True, inplace=True)
@@ -124,11 +124,11 @@ def create_cards(input_file: str, input_mode: int) -> pd.DataFrame:
         lambda x: x > 1000000000 if not pd.isnull(x) else False)
     df['added_days'] = ((
         (df.added_millis / 1000) - next_day_start.val).map(
-            get_days_round_to_zero))
+            secs_to_days_round_to_zero))
 
     if input_mode == INPUT_MODE_SQLITE:
-        df['c_difficulty'] = df.c_data.map(lambda x: get_json_val(x, 'd'))
-        df['c_stability'] = df.c_data.map(lambda x: get_json_val(x, 's'))
+        df['c_difficulty'] = df.c_data.map(lambda x: json_val_or_nan(x, 'd'))
+        df['c_stability'] = df.c_data.map(lambda x: json_val_or_nan(x, 's'))
     else: pass    # pass: in this case, already in data frame
 
     df['stability_rounded'] = df.c_stability.map(round_away)
@@ -147,7 +147,7 @@ def create_cards(input_file: str, input_mode: int) -> pd.DataFrame:
         df['col_TodayDaysElapsed'] = days_elapsed
 
     df['due_days'] = np.where(df.due_in_unix_epoch,
-        ((df.which_due - next_day_start.val).map(get_days_round_to_zero)),
+        ((df.which_due - next_day_start.val).map(secs_to_days_round_to_zero)),
         np.where(df.c_odid == 0,
                  df.c_due - df.col_TodayDaysElapsed,
                  df.c_odue - df.col_TodayDaysElapsed))
@@ -186,9 +186,9 @@ def create_reviews(input_mode: int, cards_df: Optional[pd.DataFrame]=None
                           left_on='c_id', right_on='added_millis',
                           suffixes=(None, '_y'))
 
-    rollover_hour = get_rollover_from_cards(cards_df)
-    next_day_start = timing.get_next_day_start(rollover_hour)
-    offset = timing.get_python_local_offset()
+    rollover_hour = _rollover_from_cards(cards_df)
+    next_day_start = timing.next_day_start(rollover_hour)
+    offset = timing.local_offset_from_python()
 
     # these next two are str from INPUT_MODE_TEXT and num otherwise
     df['factor'] = df.factor.map(to_int_or_nan)
@@ -198,7 +198,7 @@ def create_reviews(input_mode: int, cards_df: Optional[pd.DataFrame]=None
     df = df.astype({'lastivl': int, 'ivl': int,
                     'review_kind': int, 'taken': float})
     df['review_hr'] = df.date_secs.map(
-                    lambda x: timing.get_hour_from_secs(x, offset))
+                    lambda x: timing.secs_to_local_hour(x, offset))
 
     df['review_datetime'] = df.date_secs.map(
           datetime.datetime.fromtimestamp)
@@ -223,7 +223,7 @@ def create_reviews(input_mode: int, cards_df: Optional[pd.DataFrame]=None
     df['taken_hrs'] = df.taken / (60*60)
     df['review_relative_days'] = (
          (df.review_datetime.map(datetime.datetime.timestamp)
-          - next_day_start.val).map(get_days_round_to_zero))
+          - next_day_start.val).map(secs_to_days_round_to_zero))
     df['review_date_adj'] = (pd.to_datetime(datetime.date.today()) +
         df.review_relative_days.map(
                 lambda x: datetime.timedelta(days=x))).dt.date
@@ -269,12 +269,11 @@ def add_time_of_last_review_to_cards(df_cards: pd.DataFrame,
     df_cards = df_cards.merge(max_df[['c_id','time_of_last_review']],
                               how='left', left_index=True, right_on=['c_id'])
     df_cards.set_index(['c_id'], verify_integrity=True, inplace=True)
-    #print(df_cards)
     return df_cards
 
 def add_fsrs_retrievability(df: pd.DataFrame) -> pd.DataFrame:
-    # multiple calls to time.time() in the code that follows, but
-    # it doesn't make sense to actually advance the timer.
+    # Anki code makes multiple calls to get the system time, but we
+    # just call time.time() once and then use the value in `timing_.now`
     timing_ = timing.timing_for_timestamp(timing.TimestampSecs(time.time()),
                                           timing.TimingConfig())
     df['is_due_in_days'] =(
@@ -297,7 +296,7 @@ def add_fsrs_retrievability(df: pd.DataFrame) -> pd.DataFrame:
     # Anki.
     df['days_since_last_review'] = (
         np.where(~df.is_due_in_days,
-                0, # TODO: bug (maybe? see above), but will match Anki for now
+                0, # TODO: bug (see above), but will match Anki for now
                 (timing_.now.val - (df.due_time - SECS_IN_DAY * df.c_ivl)).map(
                                 lambda x: max(x, 0) // SECS_IN_DAY)
                 )                  )

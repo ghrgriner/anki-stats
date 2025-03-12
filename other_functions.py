@@ -127,22 +127,22 @@ def freq(df_, var, title=None, where=None, percent=False,
         # it seems better to keep it general.
         print('[No observations meet the criteria.]')
 
-def get_days_round_to_zero(x: Union[int, float]) -> int:
+def secs_to_days_round_to_zero(x: Union[int, float]) -> int:
     """Convert seconds to days, rounding towards zero."""
     if x < 0:
         return int(-1 * (-x // SECS_IN_DAY))
     else:
         return int(x // SECS_IN_DAY)
 
-def get_days_round_to_zero_w_nan(x: Union[int, float]
-                                ) -> Union[int, float]:
-    """Convert seconds to days, rounding towards zero."""
-    if math.isnan(x):
-        return np.nan
-    elif x < 0:
-        return int(-1 * (-x // SECS_IN_DAY))
-    else:
-        return int(x // SECS_IN_DAY)
+#def secs_to_days_round_to_zero_w_nan(x: Union[int, float]
+#                                ) -> Union[int, float]:
+#    """Convert seconds to days, rounding towards zero."""
+#    if math.isnan(x):
+#        return np.nan
+#    elif x < 0:
+#        return int(-1 * (-x // SECS_IN_DAY))
+#    else:
+#        return int(x // SECS_IN_DAY)
 
 def make_diff_bin(x: Optional[Union[int, float]]) -> str:
     if not x:
@@ -184,7 +184,7 @@ def round_away(x: Union[int, float]) -> Union[int, float]:
     else:
         return np.round(x)
 
-def get_json_val(x: str, key: str) -> float:
+def json_val_or_nan(x: str, key: str) -> float:
     if not x:
         return np.nan
     else:

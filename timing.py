@@ -28,7 +28,7 @@ import db
 import pandas as pd
 
 from consts import OFFSET_SOURCE_DB, OFFSET_SOURCE_PYTHON, SECS_IN_DAY
-from other_functions import get_days_round_to_zero
+from other_functions import secs_to_days_round_to_zero
 
 #------------------------------------------------------------------------------
 # Classes
@@ -73,7 +73,7 @@ class TimingConfig:
     local_offset_source : int (OFFSET_SOURCE_DB, OFFSET_SOURCE_PYTHON)
         `local_offset` will be taken from the database if available, but
         on older databases, it might not be present and is then taken
-        from the Python time package. See `get_local_offset` for
+        from the Python time package. See `local_offset_from_python` for
         details.
     sched_ver : Optional[int]
         Anki scheduling version. Valid values: 1 or 2.
@@ -90,23 +90,39 @@ class TimingConfig:
     def __init__(self) -> None:
         df_config = db.read_sql_query('select * from config')
         df_config.set_index(['KEY'], verify_integrity=True, inplace=True)
-        self.rollover_hour = _get_opt_int(df_config, 'rollover')
-        self.creation_offset = _get_opt_int(df_config, 'creationOffset')
-        local_offset = _get_opt_int(df_config, 'localOffset')
+        self.rollover_hour = _opt_int(df_config, 'rollover')
+        self.creation_offset = _opt_int(df_config, 'creationOffset')
+        local_offset = _opt_int(df_config, 'localOffset')
         if local_offset is not None:
             self.local_offset = local_offset
             self.local_offset_source = OFFSET_SOURCE_DB
         else:
-            self.local_offset = round(get_python_local_offset() / 60)
+            self.local_offset = round(local_offset_from_python() / 60)
             self.local_offset_source = OFFSET_SOURCE_PYTHON
-        self.sched_ver = _get_opt_int(df_config, 'schedVer')
+        self.sched_ver = _opt_int(df_config, 'schedVer')
         df_col = db.read_sql_query('select crt from col')
         self.creation_stamp = df_col.iloc[0, 0]
 
 #------------------------------------------------------------------------------
 # Functions
 #------------------------------------------------------------------------------
-def _get_opt_int(df: pd.DataFrame, key: str) -> Optional[int]:
+def _opt_int(df: pd.DataFrame, key: str) -> Optional[int]:
+    """Get integer value or None from collections dataframe.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Collections dataframe, where the `key` field has been made the
+        index.
+
+    key : str
+        Name of parameter to extract.
+
+    Returns
+    -------
+    The value from the `val` column of the dataset for the key,
+    decoded to an utf-8 string, or None.
+    """
     if key in df.index:
         return int(df.at[key,'val'].decode('utf-8'))
     else:
@@ -133,7 +149,7 @@ def days_elapsed_(start_date: datetime.datetime,
 
 def sched_timing_today_v1(crt: TimestampSecs,
                           now: TimestampSecs) -> SchedTimingToday:
-    days_elapsed = get_days_round_to_zero(now.val - crt.val)
+    days_elapsed = secs_to_days_round_to_zero(now.val - crt.val)
     next_day_at = TimestampSecs(crt.val + (days_elapsed + 1)*SECS_IN_DAY)
     return SchedTimingToday(now=now, days_elapsed=days_elapsed,
                             next_day_at=next_day_at)
@@ -144,7 +160,7 @@ def sched_timing_today_v2_legacy(crt: TimestampSecs,
                                  current_utc_offset: int) -> SchedTimingToday:
     crt_at_rollover = rollover_datetime(crt.datetime(current_utc_offset),
                                         rollover).timestamp()
-    days_elapsed = get_days_round_to_zero(now.val - crt_at_rollover)
+    days_elapsed = secs_to_days_round_to_zero(now.val - crt_at_rollover)
 
     next_day_at = TimestampSecs(
         rollover_datetime(now.datetime(current_utc_offset),
@@ -212,7 +228,7 @@ def timing_for_timestamp(now: TimestampSecs,
                               timing_config.local_offset,
                               rollover_hour)
 
-def get_python_local_offset() -> int:
+def local_offset_from_python() -> int:
     """Return local timezone offset from Python time package.
 
     return time.altzone if time.localtime().tm_isdst else time.timezone
@@ -226,11 +242,11 @@ def get_python_local_offset() -> int:
     else:
         return time.timezone
 
-def get_hour_from_secs(x: Union[float,int], offset: int) -> int:
+def secs_to_local_hour(x: Union[float,int], offset: int) -> int:
     """Return local hour from seconds in epoch time."""
     return math.floor(((float(x) - offset) / 3600) % 24)
 
-def get_next_day_start(rollover_hour: int) -> TimestampSecs:
+def next_day_start(rollover_hour: int) -> TimestampSecs:
     """Return date/time of the next start day (i.e., today or tomorrow)."""
     now_local = datetime.datetime.today()
     midnight_local = now_local.replace(hour=0, minute=0, second=0,
