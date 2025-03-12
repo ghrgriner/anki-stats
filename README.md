@@ -51,7 +51,7 @@ the analysis population and methods used for each table or figure)
 database fields in greater detail than that provided in the (mostly
 non-technical) [Anki Manual](https://docs.ankiweb.net)
 
-3. Provide Python code that generates tabular output that matches the
+3. Provide Python (pandas) code that generates tabular output that matches the
 output in the statistics window for each table or figure (although for
 brevity we omit the figure footnotes and provide code that matches only one
 radio button selection, usually the '1 month' radio button selection
