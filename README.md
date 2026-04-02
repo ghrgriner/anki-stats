@@ -58,11 +58,12 @@ radio button selection, usually the '1 month' radio button selection
 when this controls the amount of bins on a histogram x-axis and the
 'all' button otherwise)
 
-4. Provide example code that reuses the code needed for (3) to perform
+4. Provide [example code](./example_add_fields_to_notes.py)
+that reuses the code needed for (3) to perform
 useful tasks other than reporting statistics. For example, a sample program
 takes a text file of notes as input and outputs a text file as output adding
-the fields: the number of days since a card on the note was reviewed, and
-the number of days in the future the next card on the note will be reviewed.
+with two new fields: the number of days since a card on the note was reviewed,
+and the number of days in the future the next card on the note will be reviewed.
 
 Elaborating on point (3) above, this repository does the heavy lifting
 of the manual analyses proposed in the Anki Manual. Users can install
