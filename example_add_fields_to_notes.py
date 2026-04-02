@@ -70,7 +70,8 @@ def input_to_uploaded_id(x):
 
 # Subset the cards prior to calculating the new output variables. This code
 # will be very user-dependent. In this example, we omit New cards (since these
-# won't have a due date or 'days since last review'). Suspended cards are also# omitted. Finally, we assume a given note is associated with multiple card
+# won't have a due date or 'days since last review'). Suspended cards are also
+# omitted. Finally, we assume a given note is associated with multiple card
 # types, but only two are selected here.
 def subset_cards(df):
     # c_ord: card types, seq num starting at 0
