@@ -58,7 +58,13 @@ radio button selection, usually the '1 month' radio button selection
 when this controls the amount of bins on a histogram x-axis and the
 'all' button otherwise)
 
-In other words, for (3) above, this repository does the heavy lifting
+4. Provide example code that reuses the code needed for (3) to perform
+useful tasks other than reporting statistics. For example, a sample program
+takes a text file of notes as input and outputs a text file as output adding
+the fields: the number of days since a card on the note was reviewed, and
+the number of days in the future the next card on the note will be reviewed.
+
+Elaborating on point (3) above, this repository does the heavy lifting
 of the manual analyses proposed in the Anki Manual. Users can install
 and run the
 [companion data-exporter add-on](https://github.com/ghrgriner/anki-stats-exporter),
@@ -114,6 +120,11 @@ card with one answer on the back? Or is it more or less?
 
 9. Two or more users are studying identical decks, and they would
 like to compare their performance at the level of individual cards.
+
+10. A user keeps the 'master copy' of their notes in a spreadsheet on
+their desktop. They export its sheet(s) as text files and process these
+to make text file(s) for upload. The user would like an indicator on
+the sheet of which notes were reviewed today (or in the last week, etc.).
 
 # Input Data
 
