@@ -33,7 +33,7 @@ from prepare_data import (
 #---------------------
 # Constants
 #---------------------
-C_DF_VARS = ['c_nid','which_due','due_days']
+#C_DF_VARS = ['c_nid','which_due','due_days']
 R_DF_VARS = ['c_nid','c_id','ease','date_millis','review_kind','factor']
 
 #-----------------------------------------------------------------------------
@@ -44,6 +44,31 @@ def _date_from_timestamp_or_missing(x):
         return datetime.datetime.fromtimestamp(x).date()
     else:
         return np.nan
+
+def _calc_cvars_for_notes(df_cards, c_vars):
+    '''Pivot `df_cards` and make column names a flat index.
+
+    Parameters
+    ----------
+    df_cards : pd.DataFrame
+        Cards data frame
+
+    c_vars : str | list[str]
+        A variable or list of variables on `df_cards`. These
+        will be passed to the output data frame with names
+        '[var]_[card_label]'.
+
+    Returns
+    ----------
+    A data frame with columns `c_nid` and columns created by variables
+    specified in `c_vars`.
+    '''
+    if isinstance(c_vars, str):
+        c_vars = [ c_vars ]
+
+    trp = df_cards.pivot(index='c_nid', columns='c_CardType', values=c_vars)
+    trp.columns = trp.columns.map(lambda x: '_'.join([str(y) for y in x]))
+    return trp
 
 def _calc_days_since_etal_for_notes(df_cards, df_reviews):
     '''Create df by note with `days_since_last_review`, `days_until_due`, etc.
@@ -87,7 +112,7 @@ def _calc_days_since_etal_for_notes(df_cards, df_reviews):
 
     return out_df
 
-def add_to_notes(notes_df, idvar, c_df, r_df):
+def add_to_notes(notes_df, idvar, c_df, r_df, c_vars=None):
     '''Add fields to `notes_df` from cards/review dfs.
 
     Parameters
@@ -109,20 +134,28 @@ def add_to_notes(notes_df, idvar, c_df, r_df):
         that it was created by `load_cards_and_reviews` and then subset if
         necessary.
 
+    c_vars : str | list[str]
+        A variable or list of variables on the `c_df` data frame. These
+        will be passed to the output data frame with names
+        '[var]_[card_label]'.
+
+
     Returns
     ----------
     A data frame that is equal to `notes_df`, but with the fields
     `days_since_last_review` and `days_until_due`, among others, added.
-    See the fields returned from `_calc_days_since_etal_for_notes` for the
-    complete list.
+    The added fields are those returned from
+    `_calc_days_since_etal_for_notes` and those requested in the `c_vars`
+    parameter.
     '''
 
     # just to be explicit about which fields are used
-    c_df = c_df[C_DF_VARS + [idvar]]
+    #c_df = c_df[C_DF_VARS + [idvar]]
     r_df = r_df[R_DF_VARS]
 
     # Make mapping from `c_nid` to variable name given in idvar; check 1:1
     c_nid_by_idvar_df = c_df[['c_nid', idvar]].drop_duplicates().copy()
+
     check_dups = c_nid_by_idvar_df.duplicated(subset=['c_nid'])
     if check_dups.any():
         print(c_nid_by_idvar_df[check_dups])
@@ -135,6 +168,11 @@ def add_to_notes(notes_df, idvar, c_df, r_df):
 
     # 4. Merge ex_df and cards_df
     final_df = notes_w_n_cid_df.merge(notes_w_days_since_df,
+                                      on='c_nid', how='left')
+
+    if c_vars is not None:
+        notes_w_cvars_df = _calc_cvars_for_notes(c_df, c_vars)
+        final_df = final_df.merge(notes_w_cvars_df,
                                       on='c_nid', how='left')
 
     return final_df

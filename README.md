@@ -61,9 +61,10 @@ when this controls the amount of bins on a histogram x-axis and the
 4. Provide [example code](./example_add_fields_to_notes.py)
 that reuses the code needed for (3) to perform
 useful tasks other than reporting statistics. For example, a sample program
-takes a text file of notes as input and outputs a text file as output
-with two new fields: the number of days since a card on the note was reviewed,
-and the number of days in the future the next card on the note will be reviewed.
+takes a text file of notes as input and outputs a text file with new fields, e.g.,
+the number of days since a card on the note was reviewed,
+the number of days in the future the next card on the note will be reviewed,
+the flags for each card on the note, etc.
 
 Elaborating on point (3) above, this repository does the heavy lifting
 of the manual analyses proposed in the Anki Manual. Users can install
@@ -125,7 +126,9 @@ like to compare their performance at the level of individual cards.
 10. A user keeps the 'master copy' of their notes in a spreadsheet on
 their desktop. They export its sheet(s) as text files and process these
 to make text file(s) for upload. The user would like an indicator on
-the sheet of which notes were reviewed today (or in the last week, etc.).
+the sheet of properties stored in Anki, e.g., which notes were reviewed
+today (or in the last week, etc.), the due date, flags for cards on the
+note, etc.
 
 # Input Data
 
