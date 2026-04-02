@@ -95,7 +95,7 @@ def create_cards(input_file: str, input_mode: int) -> pd.DataFrame:
         df['col_RolloverHour'] = rollover_hour
 
         # Get Note Type and Card Type
-        notes = db.read_sql_query('select id, mid AS ntid from notes')
+        notes = db.read_sql_query('select id, mid AS ntid, flds from notes')
         df = df.merge(notes, how='left', left_on=['c_nid'], right_on='id')
         notetypes = db.read_sql_query('select id AS ntid, name AS c_NoteType'
                                       ' from notetypes')
