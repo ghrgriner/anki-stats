@@ -43,6 +43,16 @@ not full-blown computer scientists. It would benefit these users
 to have a Python implementation for manual analysis as well as
 improved documentation of behavior in the Rust backend.
 
+A final advantage of a Python implementation is that once the statistics
+are extracted from the Anki software into data frames, they can be used
+for purposes other than statistical reporting. For example, users who
+keep the master copy of their notes on their desktop (e.g., in a spreadsheet)
+can run programs to generate columns for pasting (or otherwise incorporating)
+into these sheets. Fields of interest might include the days since a note
+was studied, the days until the next card for the note is due, card flag
+or difficulty information, etc. An [example program](./example_add_fields_to_notes.py)
+is provided for interested users to customize.
+
 ## Objectives
 
 Given the above, the purpose of this repository and documentation is to:
