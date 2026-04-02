@@ -130,7 +130,7 @@ def add_to_notes(notes_df, idvar, c_df, r_df):
     c_nid_by_idvar_df = c_df.drop_duplicates(subset=['c_nid',idvar]).copy()
     check_dups = c_nid_by_idvar_df.duplicated(subset=['c_nid'])
     if check_dups.any():
-        print(c_nid_by_advar_df[check_dups])
+        print(c_nid_by_idvar_df[check_dups])
         raise ValueError(f'`c_nid` field in `c_df` does not map uniquely to '
                          f'{idvar=}')
 
