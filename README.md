@@ -165,15 +165,23 @@ There are other ways of interacting with the Anki software backend
 than those illustrated in this repository. For example, there is an
 add-on called AnkiConnect that appears to be widely used but also
 has some apparent limitations discussed [here](https://forums.ankiweb.net/t/built-in-rest-api-for-anki-clients/66425).
-(We have no experience ourselves with this add-on.
+We have no experience ourselves with this add-on.
 
 There is also an `anki` Python package that can be used separately
 from Anki's GUI. The [Anki Manual](https://addon-docs.ankiweb.net/command-line-use.html)
 strongly recommends using this instead of attempting to read or
-write to the `.anki2` file directly. We suspect the code we wrote
-for the [anki-stats-exporter](https://github.com/ghrgriner/anki-stats-exporter/)
+write to the `.anki2` file directly. We suspect the
+the [anki-stats-exporter](https://github.com/ghrgriner/anki-stats-exporter/) add-on we wrote
 would not require much modification to be used with this package, since
-they both use the `anki` module in the software's code.
+they both use the `anki` module the GUI uses. Using the `anki` package would at least
+get rid of some of the more tedious aspects of using the add-on. These include the need
+to navigate to the card browser, type in the query to select the cards, 'Select All',
+and then answer 'Yes' to the pop-ups. However, we estimate the `anki` package would
+still take an order of magnitude longer than accessing the database directly. The add-on
+takes about 60 s currently to download 25-30k cards, while downloading using direct access
+takes 3-4 s. The 60 s doesn't include the tedious point-and-click time mentioned above for
+the add-on. When this is included, it takes us 3-4 minutes to download information for
+two decks. Despite this, we have no plans to provide example code using the `anki` package.
 
 # Anki Version
 
