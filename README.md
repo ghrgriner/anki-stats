@@ -61,7 +61,7 @@ when this controls the amount of bins on a histogram x-axis and the
 4. Provide [example code](./example_add_fields_to_notes.py)
 that reuses the code needed for (3) to perform
 useful tasks other than reporting statistics. For example, a sample program
-takes a text file of notes as input and outputs a text file as output adding
+takes a text file of notes as input and outputs a text file as output
 with two new fields: the number of days since a card on the note was reviewed,
 and the number of days in the future the next card on the note will be reviewed.
 
