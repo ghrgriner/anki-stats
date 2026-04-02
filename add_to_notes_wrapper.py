@@ -121,13 +121,8 @@ def add_to_notes(notes_df, idvar, c_df, r_df):
     c_df = c_df[C_DF_VARS + [idvar]]
     r_df = r_df[R_DF_VARS]
 
-    # 1. notes_df - columns: orig_order, id (user-defined note ID)
-    #notes_df.index.set_names('orig_order', inplace=True)
-    #notes_df.reset_index(inplace=True)
-
-    # 3. c_df - c_id, date_of_last_review
-    
-    c_nid_by_idvar_df = c_df.drop_duplicates(subset=['c_nid',idvar]).copy()
+    # Make mapping from `c_nid` to variable name given in idvar; check 1:1
+    c_nid_by_idvar_df = c_df[['c_nid', idvar]].drop_duplicates().copy()
     check_dups = c_nid_by_idvar_df.duplicated(subset=['c_nid'])
     if check_dups.any():
         print(c_nid_by_idvar_df[check_dups])
