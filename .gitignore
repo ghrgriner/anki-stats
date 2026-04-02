@@ -17,3 +17,4 @@ test.py
 protoc
 run_both.sh
 hold
+personal_stats.py
