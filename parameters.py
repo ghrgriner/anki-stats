@@ -1,4 +1,4 @@
-# Parameters that can be set by the user
+# Parameters for `anki_stats.py` that can be set by the user
 # Copyright (C) 2025 Ray Griner
 #
 # This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------------
 
-"""Parameters that can be set by the user.
+"""Parameters for `anki_stats.py` that can be set by the user.
+
+However, this parameter file isn't used for example_add_fields_to_notes.py.
+In the latter case, the parameters are edited in the file itself.
 """
 
 from consts import INPUT_MODE_TEXT, INPUT_MODE_SQLITE # pylint: disable=unused-import
