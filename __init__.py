@@ -1,4 +1,4 @@
-# Python code to generate statistics similar to those in Anki
+# Python code to generate statistics similar to those in Anki™ software
 # Copyright (C) 2025 Ray Griner
 #
 # This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------------
 
-"""Python code to generate statistics similar to those in Anki v25.02.
+"""Python code to create statistics similar to those in Anki™ software v25.02.
 
 The aim is to show at a high-level how to generate the statistics provided
 in the Anki Statistics window outside of the Anki application using an export
@@ -48,5 +48,10 @@ where:
     table for this card, with '-----' separating each entry and the fields
     within each entry delimited by '#'. The included fields are:
         id, type, ease, ivl, lastivl, time, factor.
+
+Trademark Notice
+----------------
+Anki is a registered trademark of Ankitects Pty Ltd.
+We are not endorsed by or affiliated with Ankitects Pty Ltd.
 """
 

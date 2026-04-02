@@ -1,8 +1,12 @@
+# Trademark Notice
+Anki is a registered trademark of Ankitects Pty Ltd.
+We are not endorsed by or affiliated with Ankitects Pty Ltd.
+
 # Introduction
 
-Anki is open-source flashcard software written in Python, Qt, Rust,
+Anki™ is open-source flashcard software written in Python, Qt, Rust,
 Svelte, and other languages. Flashcards are organized into decks,
-and Anki provides a
+and Anki software provides a
 [statistics window](https://docs.ankiweb.net/stats.html#statistics)
 where users can obtain information on their studying performance for a deck.
 In total, eight to eleven figures and two text/tabular outputs are
@@ -20,19 +24,19 @@ customizability, often a single set of radio buttons to choose
 the length of time to display or amount of history to use in the analysis.
 Nevertheless, there are
 [various use cases](#Motivation) where additional analyses would be of interest.
-The Anki authors
+The Anki software authors
 acknowledge in the user manual there may be users interested in their own
 statistics (which they call ['manual analysis'](https://docs.ankiweb.net/stats.html#manual-analysis))
 but support this only with detailed (and a bit out-of-date) documentation
 on the table logging reviews as well as unimplemented suggestions on how
 data can be extracted.
 
-Anki has [an add-on interface](https://addon-docs.ankiweb.net) where users
+Anki software has [an add-on interface](https://addon-docs.ankiweb.net) where users
 can write Python modules that interact with the software.
 There are [existing add-ons](https://github.com/ghrgriner/anki-stats/wiki/Existing-Add%E2%80%90Ons-That-Create-Custom-Figures)
 that add custom figures to the new (or legacy [see previous link]) statistics
 window. However, for one-time or infrequent analyses, we believe it is not
-worth the effort of integrating the analysis into Anki. Python is a
+worth the effort of integrating the analysis into Anki software. Python is a
 general-purpose programming language widely adopted and used, especially
 among the subset of users with computer programming ability who are
 not full-blown computer scientists. It would benefit these users
@@ -43,7 +47,7 @@ improved documentation of behavior in the Rust backend.
 
 Given the above, the purpose of this repository and documentation is to:
 
-1. Describe the statistics included in the Anki statistics window
+1. Describe the statistics included in the Anki software statistics window
 in greater detail than that provided by the application (e.g., to describe
 the analysis population and methods used for each table or figure)
 
@@ -74,7 +78,7 @@ update the parameters in `parameters.py` with the path(s) to the downloaded
 file(s), and then run `anki_stats.py` to create analysis datasets at the
 card and review level from which they can immediately make custom
 tables and figures. The export step can be omitted if the user elects
-to configure the input parameters to [access the Anki database directly](https://github.com/ghrgriner/anki-stats/wiki/Alternate-Data-Access-Methods).
+to configure the input parameters to [access the Anki software database directly](https://github.com/ghrgriner/anki-stats/wiki/Alternate-Data-Access-Methods).
 
 # Motivation
 
@@ -126,9 +130,9 @@ like to compare their performance at the level of individual cards.
 10. A user keeps the 'master copy' of their notes in a spreadsheet on
 their desktop. They export its sheet(s) as text files and process these
 to make text file(s) for upload. The user would like an indicator on
-the sheet of properties stored in Anki, e.g., which notes were reviewed
-today (or in the last week, etc.), the due date, flags for cards on the
-note, etc.
+the sheet of properties stored in the Anki software database, e.g., which
+notes were reviewed today (or in the last week, etc.), the due date, flags
+for cards on the note, etc.
 
 # Input Data
 
