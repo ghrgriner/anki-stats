@@ -182,7 +182,9 @@ def create_reviews(input_mode: int, cards_df: Optional[pd.DataFrame]=None
                         'lastIvl': 'lastivl',
                         'time': 'taken_millis'}, axis=1)
         if cards_df is not None:
-            df = df.merge(cards_df[['added_millis']], how='inner',
+            # c_nid not needed to recreate statistics, but is useful in
+            # other situations, so get it here
+            df = df.merge(cards_df[['c_nid','added_millis']], how='inner',
                           left_on='c_id', right_on='added_millis',
                           suffixes=(None, '_y'))
 

@@ -34,7 +34,7 @@ from prepare_data import (
 # Constants
 #---------------------
 C_DF_VARS = ['c_nid','which_due','due_days']
-R_DF_VARS = ['c_id','ease','date_millis','review_kind','factor']
+R_DF_VARS = ['c_nid','c_id','ease','date_millis','review_kind','factor']
 
 #-----------------------------------------------------------------------------
 # Functions
@@ -136,12 +136,7 @@ def add_to_notes(notes_df, idvar, c_df, r_df):
 
     notes_w_n_cid_df = notes_df.merge(c_nid_by_idvar_df, how='left', on=idvar)
 
-    # Add the note id to the review data frame
-    revs_w_n_cid_df = r_df.merge(c_df[['c_nid']], how='left',
-                        left_on='c_id', right_index=True)
-
-    notes_w_days_since_df = _calc_days_since_etal_for_notes(c_df,
-                                                            revs_w_n_cid_df)
+    notes_w_days_since_df = _calc_days_since_etal_for_notes(c_df, r_df)
 
     # 4. Merge ex_df and cards_df
     final_df = notes_w_n_cid_df.merge(notes_w_days_since_df,
