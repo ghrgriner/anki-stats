@@ -195,8 +195,7 @@ def load_cards_and_reviews(sqlite_file, deck_name) -> None:
 
     #df_r_and_c = df_cards.merge(df_reviews, how='left', on='c_id')
 
-    #if INPUT_MODE == INPUT_MODE_SQLITE:
-    #    df_cards_m = add_fsrs_retrievability(df_cards_m)
+    df_cards_m = add_fsrs_retrievability(df_cards_m)
 
     db.close()
 
