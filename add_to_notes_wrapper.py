@@ -41,10 +41,10 @@ R_DF_VARS = ['c_nid','c_id','ease','date_millis','review_kind','factor']
 # Functions
 #-----------------------------------------------------------------------------
 def _date_from_timestamp_or_missing(x):
-    if not pd.isna(x):
+    if not (pd.isna(x) or x is None):
         return datetime.datetime.fromtimestamp(x).date()
     else:
-        return np.nan
+        return np.datetime64('NaT')
 
 def _calc_cvars_for_notes(df_cards, c_vars):
     '''Pivot `df_cards` and make column names a flat index.
@@ -71,17 +71,26 @@ def _calc_cvars_for_notes(df_cards, c_vars):
     trp.columns = trp.columns.map(lambda x: '_'.join([str(y) for y in x]))
     return trp
 
+def _days_before_today(x):
+    if pd.isna(x):
+        return np.nan
+    else:
+        return (datetime.date.today() - x).days
+
 def _calc_days_since_etal_for_notes(df_cards, df_reviews):
     '''Create df by note with `days_since_last_review`, `days_until_due`, etc.
 
     Returns
     -------
-    Data frame with the following fields:
+    Data frame that is one record per unique `c_nid` in `df_cards` with
+    the following fields:
     - c_nid : Anki internal note id
     - date_secs : Time of last review in seconds (for debugging) for any
         card on the note
-    - date_of_last_review : Date of last review (or np.nan)
-    - days_since_last_review : Today - `date_of_last_review`
+    - date_of_last_review : Date of last review (or np.nat)
+    - days_since_last_review : Today - `date_of_last_review (or np.nan)`
+    - date_of_last_lapse : Date of last lapse (or np.nat)
+    - days_since_last_lapse : Today - `date_of_last_lapse (or np.nan)`
     - days_until_due : Days until earliest due date (across cards)
     '''
     subset_df = df_reviews[  (df_reviews.ease >= 1)
@@ -102,18 +111,18 @@ def _calc_days_since_etal_for_notes(df_cards, df_reviews):
     df_notes = df_cards.drop_duplicates(subset=['c_nid']).copy()
     df_notes.drop(['which_due','due_days'], inplace=True, axis=1)
 
-    out_df = df_notes.merge(last_review_secs, on='c_nid')
-    out_df = out_df.merge(last_lapse_secs, on='c_nid')
+    out_df = df_notes.merge(last_review_secs, on='c_nid', how='left')
+    out_df = out_df.merge(last_lapse_secs, on='c_nid', how='left')
     out_df = out_df.merge(min_due_days, on='c_nid')
 
     out_df['date_of_last_review'] = out_df.date_secs.map(
         _date_from_timestamp_or_missing)
     out_df['days_since_last_review'] = out_df.date_of_last_review.map(
-        lambda x: (datetime.date.today() - x).days)
+        _days_before_today)
     out_df['date_of_last_lapse'] = out_df.lapse_date_secs.map(
         _date_from_timestamp_or_missing)
     out_df['days_since_last_lapse'] = out_df.date_of_last_lapse.map(
-        lambda x: (datetime.date.today() - x).days)
+        _days_before_today)
 
     out_df['days_until_due'] = out_df.due_days
 
