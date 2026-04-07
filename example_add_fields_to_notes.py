@@ -1,5 +1,5 @@
 # Example program for adding selected fields to input notes file
-# Copyright (C) 2025 Ray Griner
+# Copyright (C) 2026 Ray Griner
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -28,9 +28,11 @@ might want to know when a note was last studied or when it will be due for
 study.
 
 This program creates a file that the user can then use to paste back into
-the spreadsheet. The current columns created are `days_since_last_review`
-and `days_until_due`. The 'raw' file that is the input to this program is
-the text file exported from the spreadsheet (before any other processing).
+the spreadsheet. The columns created in this example program are
+`days_since_last_review`, `days_since_last_lapse`, and `days_until_due`.
+More fields are possible, see `add_to_notes` documentation for details.
+The 'raw' file that is the input to this program is the text file exported
+from the spreadsheet (before any other processing).
 '''
 
 import csv
@@ -85,7 +87,7 @@ def subset_cards(df):
 #---------------------
 def write_output(df, raw_idvar, output_file):
     final_set = df[[raw_idvar, 'uploaded_id','days_since_last_review',
-                    'days_until_due']]
+                    'days_since_last_lapse','days_until_due']]
     # The floats exported are actually either integer or np.nan, so can be
     # formatted to 0 decimal places when exporting. If more control is needed,
     # can use the following:
