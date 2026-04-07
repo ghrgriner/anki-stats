@@ -91,7 +91,8 @@ def _calc_days_since_etal_for_notes(df_cards, df_reviews):
     - days_since_last_review : Today - `date_of_last_review` (or np.nan).
       In the future this might be changed to use the rollover hour, but
       currently, it does not.
-    - date_of_last_lapse : Date of last lapse (or np.nat)
+    - date_of_last_lapse : Date of last lapse (or np.nat). A 'lapse' is
+      a review where 'Again' was chosen (`ease == 1`).
     - days_since_last_lapse : Today - `date_of_last_lapse` (or np.nan).
       The same comment for rollover hour made on `days_since_last_review`
       applies here.
