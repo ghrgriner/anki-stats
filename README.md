@@ -49,9 +49,9 @@ for purposes other than statistical reporting. For example, users who
 keep the master copy of their notes on their desktop (e.g., in a spreadsheet)
 can run programs to generate columns for pasting (or otherwise incorporating)
 into these sheets. Fields of interest might include the days since a note
-was studied, the days until the next card for the note is due, card flag
+was studied or lapsed, the days until the next card for the note is due, card flag
 or difficulty information, etc. An [example program](./example_add_fields_to_notes.py)
-is provided for interested users to customize.
+is provided for interested users to use or customize.
 
 ## Objectives
 
@@ -77,6 +77,7 @@ that reuses the code needed for (3) to perform
 useful tasks other than reporting statistics. For example, a sample program
 takes a text file of notes as input and outputs a text file with new fields, e.g.,
 the number of days since a card on the note was reviewed,
+the number of days since a card on the note lapsed,
 the number of days in the future the next card on the note will be reviewed,
 the flags for each card on the note, etc.
 
@@ -141,8 +142,8 @@ like to compare their performance at the level of individual cards.
 their desktop. They export its sheet(s) as text files and process these
 to make text file(s) for upload. The user would like an indicator on
 the sheet of properties stored in the Anki software database, e.g., which
-notes were reviewed today (or in the last week, etc.), the due date, flags
-for cards on the note, etc.
+notes were reviewed or lapsed today (or in the last week, etc.), the due
+date, flags for cards on the note, etc.
 
 # Input Data
 
