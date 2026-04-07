@@ -102,9 +102,9 @@ def _calc_days_since_etal_for_notes(df_cards, df_reviews):
     df_notes = df_cards.drop_duplicates(subset=['c_nid']).copy()
     df_notes.drop(['which_due','due_days'], inplace=True, axis=1)
 
-    out_df = df_notes.merge(last_review_secs, left_on='c_nid',right_on='c_nid')
-    out_df = out_df.merge(last_lapse_secs, left_on='c_nid', right_on='c_nid')
-    out_df = out_df.merge(min_due_days, left_on='c_nid', right_on='c_nid')
+    out_df = df_notes.merge(last_review_secs, on='c_nid')
+    out_df = out_df.merge(last_lapse_secs, on='c_nid')
+    out_df = out_df.merge(min_due_days, on='c_nid')
 
     out_df['date_of_last_review'] = out_df.date_secs.map(
         _date_from_timestamp_or_missing)
