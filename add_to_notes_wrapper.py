@@ -88,9 +88,13 @@ def _calc_days_since_etal_for_notes(df_cards, df_reviews):
     - date_secs : Time of last review in seconds (for debugging) for any
         card on the note
     - date_of_last_review : Date of last review (or np.nat)
-    - days_since_last_review : Today - `date_of_last_review (or np.nan)`
+    - days_since_last_review : Today - `date_of_last_review` (or np.nan).
+      In the future this might be changed to use the rollover hour, but
+      currently, it does not.
     - date_of_last_lapse : Date of last lapse (or np.nat)
-    - days_since_last_lapse : Today - `date_of_last_lapse (or np.nan)`
+    - days_since_last_lapse : Today - `date_of_last_lapse` (or np.nan).
+      The same comment for rollover hour made on `days_since_last_review`
+      applies here.
     - days_until_due : Days until earliest due date (across cards)
     '''
     subset_df = df_reviews[  (df_reviews.ease >= 1)
