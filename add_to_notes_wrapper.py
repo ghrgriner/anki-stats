@@ -20,6 +20,7 @@ import datetime
 import sys
 
 import pandas as pd
+import numpy as np
 
 import db
 
@@ -89,26 +90,37 @@ def _calc_days_since_etal_for_notes(df_cards, df_reviews):
                            & (  (df_reviews.review_kind != REVLOG_FILT)
                               | (df_reviews.factor != 0))].copy()
     subset_df['date_secs'] = subset_df.date_millis.astype(int) / 1000
-    max_date_secs = subset_df.groupby(['c_nid'],
+    last_review_secs = subset_df.groupby(['c_nid'],
                                       as_index=False)['date_secs'].max()
+    last_lapse_secs = subset_df[subset_df.ease == 1].groupby(['c_nid'],
+                                      as_index=False)['date_secs'].max()
+    last_lapse_secs.rename(columns={'date_secs': 'lapse_date_secs'},
+                           inplace=True)
     min_due_days = df_cards.groupby(['c_nid'],
                                     as_index=False)['due_days'].min()
 
     df_notes = df_cards.drop_duplicates(subset=['c_nid']).copy()
     df_notes.drop(['which_due','due_days'], inplace=True, axis=1)
 
-    out_df = df_notes.merge(max_date_secs, left_on='c_nid', right_on='c_nid')
+    out_df = df_notes.merge(last_review_secs, left_on='c_nid',right_on='c_nid')
+    out_df = out_df.merge(last_lapse_secs, left_on='c_nid', right_on='c_nid')
     out_df = out_df.merge(min_due_days, left_on='c_nid', right_on='c_nid')
 
     out_df['date_of_last_review'] = out_df.date_secs.map(
         _date_from_timestamp_or_missing)
     out_df['days_since_last_review'] = out_df.date_of_last_review.map(
         lambda x: (datetime.date.today() - x).days)
+    out_df['date_of_last_lapse'] = out_df.lapse_date_secs.map(
+        _date_from_timestamp_or_missing)
+    out_df['days_since_last_lapse'] = out_df.date_of_last_lapse.map(
+        lambda x: (datetime.date.today() - x).days)
 
     out_df['days_until_due'] = out_df.due_days
 
     out_df = out_df[['c_nid','date_secs','date_of_last_review',
-                     'days_since_last_review','days_until_due']]
+                     'days_since_last_review',
+                     'date_of_last_lapse','days_since_last_lapse',
+                     'days_until_due']]
 
     return out_df
 
