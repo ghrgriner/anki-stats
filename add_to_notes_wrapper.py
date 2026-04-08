@@ -82,6 +82,9 @@ def _calc_days_since_etal_for_notes(df_cards, df_reviews):
       A 'lapse' is a review where 'Again' was chosen (`ease == 1`).
     - days_until_due : Days until earliest due date (across cards)
     '''
+    # Remove records in reviews table that aren't actual reviews (e.g.,
+    # sometimes a record is simply an indication a review was rescheduled,
+    # and this can be done without even opening the card).
     subset_df = df_reviews[  (df_reviews.ease >= 1)
                            & (df_reviews.ease <= 4)
                            & (~pd.isna(df_reviews.date_millis))
