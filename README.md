@@ -188,13 +188,6 @@ takes 3-4 s. The 60 s doesn't include the tedious point-and-click time mentioned
 the add-on. When this is included, it takes us 3-4 minutes to download information for
 two decks. Despite this, we have no plans to provide example code using the `anki` package.
 
-## Example for Adding Fields to Note File Ignores Rollover Hour
-
-The example program that adds fields to an input note file does not consider the configured
-rollover hour when calculating `days_since_last_review` and `days_since_last_lapse`. The
-rollover hour is used in the `anki_stats.py` program that replicates many of the statistics
-available in the statistics window of the Anki software.
-
 # Anki Version
 
 This documentation was written based on v25.02 of the Anki
