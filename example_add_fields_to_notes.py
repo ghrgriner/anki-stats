@@ -85,16 +85,26 @@ def subset_cards(df):
 #---------------------
 # Functions
 #---------------------
+def int_in_float_to_str(x):
+    if pd.isna(x):
+        return ''
+    elif x == -0.0:
+        return '0'
+    else:
+        return str(int(x))
+    return out_str
+
 def write_output(df, raw_idvar, output_file):
     final_set = df[[raw_idvar, 'uploaded_id','days_since_last_review',
                     'days_since_last_lapse','days_until_due']]
-    # The floats exported are actually either integer or np.nan, so can be
-    # formatted to 0 decimal places when exporting. If more control is needed,
-    # can use the following:
 
-    #for var in vars_to_convert_to_str:
-    #    df[var] = df[var].map(
-    #        lambda x: str(int(x)) if not pd.isna(x) else '')
+    # The floats exported are actually either integer or np.nan, so can be
+    # formatted to 0 decimal places when exporting. We use the
+    # `int_in_float_to_str` function to avoid the unsightly '-0'.
+
+    for var in ['days_since_last_lapse','days_since_last_review']
+        df[var] = df[var].map(int_in_float_to_str)
+
     final_set.to_csv(output_file, sep='\t', quoting=csv.QUOTE_NONE,
                      index=None, float_format='%.0f')
 
